@@ -147,7 +147,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AppendEntry.cpp" />
+    <ClCompile Include="Candidate.cpp" />
+    <ClCompile Include="Command.cpp" />
+    <ClCompile Include="Follower.cpp" />
+    <ClCompile Include="Leader.cpp" />
     <ClCompile Include="RaftTFM.cpp" />
+    <ClCompile Include="RequestVote.cpp" />
+    <ClCompile Include="Server.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AppendEntry.h" />
+    <ClInclude Include="Candidate.h" />
+    <ClInclude Include="Command.h" />
+    <ClInclude Include="Follower.h" />
+    <ClInclude Include="Leader.h" />
+    <ClInclude Include="RaftDefs.h" />
+    <ClInclude Include="RequestVote.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="Server.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="RaftTFM.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
