@@ -1,7 +1,9 @@
 #include "Server.h"
 #include <string>
+#include "Log.h"
+#include <string>
 
-Server::Server()
+Server::Server(uint32_t server_id)
 {
 
 	// Persisten state on all servers. 
@@ -15,6 +17,11 @@ Server::Server()
 	state_					= StateEnum::follower_state;
 
 	connector_ = get_current_shape_sever(state_);
+
+	server_id_ = server_id;
+
+		
+	Log::trace("Starting server ID:" + std::to_string(server_id_) + "\r\n");
 }
 
 void Server::send(void* rpc)
@@ -30,14 +37,21 @@ void* Server::receive()
 IConnector* Server::get_current_shape_sever(StateEnum state)
 {
 	IConnector* connector; 
-	if (state == StateEnum::follower_state)
+	if (state == StateEnum::follower_state) {
 		connector = new Follower();
-	else if (state == StateEnum::candidate_state)
+		Log::trace("Created Follower\r\n");
+	}
+	else if (state == StateEnum::candidate_state) {
 		connector = new Candidate();
-	else if (state == StateEnum::leader_state)
-		connector = new Leader();
+		Log::trace("Created Candidate\r\n");
+	}
+	else if (state == StateEnum::leader_state) {
+		connector = new Leader();	
+		Log::trace("Created Leader\r\n");
+	}
 	else {
-		printf("Server::get_current_shape_sever -  FAILED!!! Unknow state:%d\r\n", state);
+		std::string color_name{ "GREEN" };
+		Log::trace("Server::get_current_shape_sever -  FAILED!!! Unknow state:" + std::to_string(static_cast<int>(state)) + "%d\r\n");
 		connector = NULL;
 	}
 

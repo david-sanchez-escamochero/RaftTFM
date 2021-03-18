@@ -15,7 +15,7 @@ class Server
 {
 
 public: 
-	Server();
+	Server(uint32_t server_id);
 	void send(void *);
 	void* receive();
 
@@ -35,6 +35,7 @@ private:
 
 	IConnector* get_current_shape_sever(StateEnum state);
 	IConnector* connector_;
+	uint32_t    server_id_;
 
 	//Candidate*	candidate_;
 	//Follower*	follower_;

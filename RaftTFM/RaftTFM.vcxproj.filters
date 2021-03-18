@@ -39,6 +39,15 @@
     <ClCompile Include="RequestVote.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Log.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RPC.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Communication.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Follower.h">
@@ -69,6 +78,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="IConnector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Log.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RPC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Communication.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

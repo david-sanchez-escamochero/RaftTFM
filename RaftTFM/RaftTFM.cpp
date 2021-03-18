@@ -2,10 +2,21 @@
 //
 
 #include <iostream>
+#include "Server.h"
+#include <stdint.h>
+#include <string>
 
-int main()
+int main(int argc, char** argv)
 {
-    std::cout << "Hello World!\n";
+    std::cout << "RAFT Test...\n";
+    if (argc < 2) {
+        printf("Usage:\r\n");
+        printf("Param (1): id server\r\n");        
+        printf("Example RaftTest.exe 1\r\n");
+    }
+    else {
+        Server server(std::stoi(argv[1]));
+    }    
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu

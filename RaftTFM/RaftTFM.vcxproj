@@ -152,8 +152,11 @@
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="Follower.cpp" />
     <ClCompile Include="Leader.cpp" />
+    <ClCompile Include="Log.cpp" />
+    <ClCompile Include="Communication.cpp" />
     <ClCompile Include="RaftTFM.cpp" />
     <ClCompile Include="RequestVote.cpp" />
+    <ClCompile Include="RPC.cpp" />
     <ClCompile Include="Server.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -163,9 +166,12 @@
     <ClInclude Include="Follower.h" />
     <ClInclude Include="IConnector.h" />
     <ClInclude Include="Leader.h" />
+    <ClInclude Include="Log.h" />
+    <ClInclude Include="Communication.h" />
     <ClInclude Include="RaftDefs.h" />
     <ClInclude Include="RequestVote.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="RPC.h" />
     <ClInclude Include="Server.h" />
   </ItemGroup>
   <ItemGroup>
