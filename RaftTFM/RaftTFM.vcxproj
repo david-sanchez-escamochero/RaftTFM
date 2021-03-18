@@ -161,6 +161,7 @@
     <ClInclude Include="Candidate.h" />
     <ClInclude Include="Command.h" />
     <ClInclude Include="Follower.h" />
+    <ClInclude Include="IConnector.h" />
     <ClInclude Include="Leader.h" />
     <ClInclude Include="RaftDefs.h" />
     <ClInclude Include="RequestVote.h" />
