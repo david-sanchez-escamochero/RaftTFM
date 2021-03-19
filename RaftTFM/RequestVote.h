@@ -2,9 +2,10 @@
 
 #include <stdint.h>
 
-class RequestVote
+
+class RequestVote 
 {
-protected:
+private:
 	// Arguments:
 	uint32_t argument_term_;				// Candidate's term
 	uint32_t argument_candidate_id_;		// Candidate requesting vote

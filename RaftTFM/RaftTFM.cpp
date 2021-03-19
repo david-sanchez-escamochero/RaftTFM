@@ -5,6 +5,10 @@
 #include "Server.h"
 #include <stdint.h>
 #include <string>
+#include "Communication.h"
+#include "RPC.h"
+
+
 
 int main(int argc, char** argv)
 {
@@ -16,6 +20,21 @@ int main(int argc, char** argv)
     }
     else {
         Server server(std::stoi(argv[1]));
+        server.start();
+
+
+        // Test(sender)
+        //Communication communication;
+        //RPC rpc;
+        //rpc.rpc_type = RPCTypeEnum::rpc_append_request_vote;
+        //rpc.rpc_direction = RPCDirection::rpc_out_result;
+        //communication.sendMessage(&rpc, 6000, "", "", "");
+
+
+        // Test(receiver)
+        //Communication communication;
+        //RPC rpc;
+        //communication.receiveMessage(&rpc, 6000, "");
     }    
 }
 

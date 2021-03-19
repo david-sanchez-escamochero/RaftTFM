@@ -16,8 +16,13 @@ class Server
 
 public: 
 	Server(uint32_t server_id);
-	void send(void *);
-	void* receive();
+	~Server();
+	void		send(void *);
+	void*		receive();
+	void		start();
+	IConnector* get_current_shape_sever(StateEnum state);
+	uint32_t    get_server_id();
+	void		set_new_state(StateEnum state);
 
 protected:
 	// Persisten state on all servers. 
@@ -28,18 +33,17 @@ protected:
 	// Volatile state on all servers. 
 	uint32_t commit_index_;			// Index of highest log entry known to be committed(initialized to 0, increases	monotonically)
 	uint32_t last_applied_;			// Index of highest log entry applied to state	machine(initialized to 0, increases	monotonically)
-	StateEnum state_; 
+	StateEnum current_state_; 
+	StateEnum new_state_;
 
 
 private: 
+	
+	IConnector*		connector_;
+	uint32_t		server_id_;
+	Communication	communication_;
+	bool			have_to_die_;
 
-	IConnector* get_current_shape_sever(StateEnum state);
-	IConnector* connector_;
-	uint32_t    server_id_;
-
-	//Candidate*	candidate_;
-	//Follower*	follower_;
-	//Leader*		leader_;
-
+	
 };
 
