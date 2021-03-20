@@ -16,9 +16,8 @@ Server::Server(uint32_t server_id)
 	commit_index_			= 0;							// Index of highest log entry known to be committed(initialized to 0, increases	monotonically)
 	last_applied_			= 0	;							// Index of highest log entry applied to state	machine(initialized to 0, increases	monotonically)	
 	current_state_			= StateEnum::follower_state;	// Always starts as follower. 
-	new_state_				= current_state_;				// To dectect when state changes. 
 
-	connector_ = get_current_shape_sever(current_state_);
+	set_new_state(current_state_);							// Start new Rol(Follower at the beginning)
 
 	server_id_ = server_id;
 	have_to_die_ = false;
@@ -31,9 +30,9 @@ Server::~Server()
 	have_to_die_ = true;
 }
 
-void Server::send(void* rpc)
+void Server::send(RPC* rpc, unsigned short port, std::string sender, std::string action, std::string receiver)
 {
-	connector_->send(rpc);	
+	communication_.sendMessage(rpc, port, sender, action, receiver);
 }
 
 void Server::start() 
@@ -41,22 +40,33 @@ void Server::start()
 	receive();
 }
 
+
+void Server::dispatch()
+{
+	while(!have_to_die_)
+	{
+		semaphore_.wait(server_id_);
+		RPC rpc = queue_.front();
+		std::lock_guard<std::mutex> locker(mu_);
+		{
+				if (connector_ != nullptr) {
+					connector_->receive(&rpc);
+			}
+		}
+	}
+}
+
 void* Server::receive()
 {
 	while (!have_to_die_) {
-		RPC rpc;
-		int error = communication_.receiveMessage( &rpc, PORT_BASE + RECEIVER_PORT + 1, std::string( SERVER ) + std::string( "." ) + std::to_string( get_server_id() ) );
+		RPC rpc;		
+		int error = communication_.receiveMessage( &rpc, PORT_BASE + RECEIVER_PORT + server_id_, std::string( SERVER ) + std::string( "." ) + std::to_string( get_server_id() ) );
 		if (error) {
 			Log::trace("Follower::receive - FAILED!!!  - error" + std::to_string(error) + "\r\n");
 		}
 		else {
-			if (connector_ != nullptr) {
-				if (current_state_ != new_state_) {
-					connector_ = get_current_shape_sever(new_state_);
-					current_state_ = new_state_;
-				}					
-				connector_->receive(&rpc);
-			}
+			queue_.push(rpc);
+			semaphore_.notify(server_id_);
 		}
 	}
 	return nullptr;
@@ -70,16 +80,16 @@ IConnector* Server::get_current_shape_sever(StateEnum state)
 
 	IConnector* connector; 
 	if (state == StateEnum::follower_state) {
-		connector = new Follower(this);
-		Log::trace("Created Follower\r\n");
+		connector = new Follower(this);		
+		Log::trace("Created Follower." + std::to_string(get_server_id()) + "\r\n");
 	}
 	else if (state == StateEnum::candidate_state) {
 		connector = new Candidate(this);
-		Log::trace("Created Candidate\r\n");
+		Log::trace("Created Candidate." + std::to_string(get_server_id()) + "\r\n");
 	}
 	else if (state == StateEnum::leader_state) {
 		connector = new Leader(this);	
-		Log::trace("Created Leader\r\n");
+		Log::trace("Created Leader." + std::to_string( get_server_id() ) +"\r\n");
 	}
 	else {
 		std::string color_name{ "GREEN" };
@@ -97,6 +107,29 @@ uint32_t Server::get_server_id()
 
 void Server::set_new_state(StateEnum state)
 {
-	new_state_ = state;
+	std::lock_guard<std::mutex> locker(mu_);
+		connector_ = get_current_shape_sever(state);
+		connector_->start();
+		current_state_ = state;		
+}
+
+void Server::increment_current_term()
+{
+	current_term_++;
+}
+
+uint32_t Server::get_current_term()
+{
+	return current_term_;
+}
+
+uint32_t Server::get_commit_index()
+{
+	return commit_index_;
+}
+
+uint32_t Server::get_last_applied()
+{
+	return last_applied_;
 }
 

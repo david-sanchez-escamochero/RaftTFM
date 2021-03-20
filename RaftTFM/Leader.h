@@ -14,8 +14,9 @@ public:
 	Leader(void* server);
 	~Leader();
 
-	void send(void*);
+	void send(RPC* rpc, unsigned short port, std::string sender, std::string action, std::string receiver);
 	void receive(RPC* rpc);
+	void start();
 	
 
 protected: 

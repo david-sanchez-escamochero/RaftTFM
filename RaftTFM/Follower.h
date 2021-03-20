@@ -12,15 +12,18 @@ class Follower : public IConnector
 public:
 	Follower(void* server);
 	~Follower();
-	void send(void*);
+	void send(RPC* rpc, unsigned short port, std::string sender, std::string action, std::string receiver);
 	void receive(RPC *rpc);
+	void start();
+
 protected:
-	Communication communication_;
-	RPC rpc_;
-	void* server_;
-	uint32_t time_out_to_receive_heartbeat = TIME_OUT_TO_RECEIVE_HEART_BEAT;
-	bool have_to_die_;
+	Communication	communication_;
+	RPC				rpc_;
+	void*			server_;	
+	bool			have_to_die_;
 	std::queue<RPC> queue_;
-	void dispatch(RPC* rpc);
+	void			dispatch(RPC* rpc);
+	void			check_candidate();
+	uint32_t		receiving_heartbeats_;	
 };
 

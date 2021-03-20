@@ -1,6 +1,6 @@
 #pragma once
 
-enum class RPCTypeEnum { rpc_append_entry, rpc_append_request_vote, rpc_append_heart_beat};
+enum class RPCTypeEnum { rpc_append_entry, rpc_append_request_vote};
 enum class RPCDirection { rpc_in_invoke, rpc_out_result};
 
 #include "AppendEntry.h"

@@ -173,6 +173,7 @@
     <ClInclude Include="RequestVote.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="RPC.h" />
+    <ClInclude Include="Semaphore.h" />
     <ClInclude Include="Server.h" />
   </ItemGroup>
   <ItemGroup>

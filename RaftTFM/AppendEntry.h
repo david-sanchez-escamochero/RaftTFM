@@ -6,7 +6,7 @@
 
 class AppendEntry 
 {
-private:
+public:
 	//Arguments :
 	uint32_t argument_term_;							// Leader's term
 	uint32_t argument_leader_id_;					// So follower can redirect clients
