@@ -28,6 +28,7 @@ public:
 	std::mutex	mu_;
 	void		increment_current_term();
 	uint32_t	get_current_term();
+	void		set_current_term(uint32_t term);
 	uint32_t	get_commit_index();
 	uint32_t	get_last_applied();
 

@@ -114,14 +114,21 @@ void Server::set_new_state(StateEnum state)
 }
 
 void Server::increment_current_term()
-{
+{	
 	current_term_++;
+	Log::trace("Server(" + std::to_string(server_id_) + ") Increment term from " + std::to_string(current_term_ - 1) + " to " + std::to_string(current_term_) + "\r\n");	
 }
 
 uint32_t Server::get_current_term()
 {
 	return current_term_;
 }
+
+void Server::set_current_term(uint32_t term)
+{
+	current_term_ = term;
+}
+
 
 uint32_t Server::get_commit_index()
 {

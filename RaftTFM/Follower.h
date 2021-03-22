@@ -25,5 +25,7 @@ protected:
 	void			dispatch(RPC* rpc);
 	void			check_candidate();
 	uint32_t		receiving_heartbeats_;	
+	void			dispatch_append_request_vote(RPC *rpc);
+	bool			i_have_already_voted;
 };
 

@@ -15,5 +15,9 @@ public:
 protected:
 	void* server_;
 	void send_request_vote_to_all_servers();
+	bool there_is_not_leader_;
+	bool have_to_die_;
+	void reset_receive_votes();
+	uint32_t receive_votes_;
 };
 
