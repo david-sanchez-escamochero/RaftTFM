@@ -62,6 +62,7 @@ int Communication::sendMessage(RPC* rpc, unsigned short port, std::string sender
     
     memcpy(SendBuff, reinterpret_cast<const char *>(rpc), sizeof(RPC));    
 
+    
     str_trace = "[<<<<< Sent([" + action + "]" + sender + " -> " + receiver + "(" + std::to_string(port) + "))    - OK]\r\n";
     Log::trace(str_trace);
     send(conn_socket, SendBuff, sizeof(RPC), 0);    
@@ -95,7 +96,7 @@ int Communication::receiveMessage(RPC* rpc, unsigned short port, std::string rec
     // en este caso localhost indica nuestra propia máquina...
     hp = (struct hostent*)gethostbyname("localhost");
 
-    if (!hp) {        
+    if (!hp) {
         str_trace = "[>>>>> Received(" + receiver + "(" + std::to_string(port) + ")) - FAILED] (Server not found)\r\n";
         Log::trace(str_trace);
         WSACleanup(); return MSG_ERROR_UNKNOWN_SERVER;
@@ -123,7 +124,7 @@ int Communication::receiveMessage(RPC* rpc, unsigned short port, std::string rec
         return MSG_ERROR_TO_ASSOCIATE_PORT_AND_IP_SOCKET;
     }
 
-    if (listen(conn_socket, 1) == SOCKET_ERROR) {        
+    if (listen(conn_socket, 1) == SOCKET_ERROR) {
         str_trace = "[>>>>> Received(" + receiver + "(" + std::to_string(port) + ")) - FAILED] (Failed to connect server)\r\n";
         Log::trace(str_trace);
         closesocket(conn_socket); WSACleanup();
@@ -139,16 +140,27 @@ int Communication::receiveMessage(RPC* rpc, unsigned short port, std::string rec
         closesocket(conn_socket); WSACleanup();
         return MSG_ERROR_TO_ACCEPT_INGOING_CONNECTIONS;
     }
-    
+
     // Como no vamos a aceptar más conexiones cerramos el socket escucha
     closesocket(conn_socket);
-    
-    
+
+
     recv(comm_socket, RecvBuff, sizeof(RPC), 0);
-    RPC *rpc_aux = reinterpret_cast<RPC*>(RecvBuff);            
+    RPC* rpc_aux = reinterpret_cast<RPC*>(RecvBuff);
     *rpc = *rpc_aux;
+
+    std::string str_aux;
+    if (rpc->rpc_type == RPCTypeEnum::rpc_append_entry) {
+        str_aux = "APPEND_ENTRY";           
+    }
+    else if (rpc->rpc_type == RPCTypeEnum::rpc_append_request_vote) {
+        str_aux = "REQUEST_VOTE";
+    }
+    else if (rpc->rpc_type == RPCTypeEnum::rpc_append_heart_beat) {
+        str_aux = "HEART_BEAT";
+    }
     
-    str_trace = "[>>>>> Received(" + receiver + "(" + std::to_string(port) + ")) - OK] \r\n";
+    str_trace = "[>>>>> Received [" + str_aux + "] to (" + receiver + "(" + std::to_string(port) + ")) - from (" + std::string(SERVER) + "." + std::to_string(rpc->server_id_origin) + ")   - OK] \r\n";
     Log::trace(str_trace);
     // Cerramos el socket de la comunicacion
     closesocket(comm_socket);

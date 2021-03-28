@@ -170,6 +170,7 @@
     <ClInclude Include="Log.h" />
     <ClInclude Include="Communication.h" />
     <ClInclude Include="RaftDefs.h" />
+    <ClInclude Include="RaftUtils.h" />
     <ClInclude Include="RequestVote.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="RPC.h" />

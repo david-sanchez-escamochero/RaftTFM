@@ -11,8 +11,10 @@ class RPC
 public:
 	RPC();
 
-	RPCTypeEnum rpc_type; 
+	RPCTypeEnum	 rpc_type; 
 	RPCDirection rpc_direction;
+	uint32_t	 server_id_origin;
+	uint32_t	 server_id_target;
 
 	union
 	{

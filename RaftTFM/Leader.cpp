@@ -1,8 +1,11 @@
 #include "Leader.h"
+#include "Log.h"
 
 Leader::Leader(void* server)
-{
+{	
 	server_ = server;
+	Log::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") I am a LEADER\r\n");
+	
 }
 
 Leader::~Leader()

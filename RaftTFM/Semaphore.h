@@ -4,6 +4,7 @@
 #include <condition_variable>
 #include <iostream>
 #include <string>
+#include "Log.h"
 using namespace std;
 
 
@@ -17,17 +18,15 @@ public:
     inline void notify(int tid) {
         std::unique_lock<std::mutex> lock(mtx);
         count++;
-        cout << "thread " << tid << " notify" << endl;
+        //Log::trace("thread " + std::to_string(tid) + " notify\r\n");        
         //notify the waiting thread
         cv.notify_one();
     }
     inline void wait(int tid) {
         std::unique_lock<std::mutex> lock(mtx);
-        while (count == 0) {
-            cout << "thread " << tid << " wait" << endl;
+        while (count == 0) {            
             //wait on the mutex until notify is called
-            cv.wait(lock);
-            cout << "thread " << tid << " run" << endl;
+            cv.wait(lock);            
         }
         count--;
     }
