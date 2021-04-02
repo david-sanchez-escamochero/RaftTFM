@@ -65,7 +65,7 @@ void Server::start()
 
 
 	// Start new Rol(Follower at the beginning)
-	set_new_state(StateEnum::candidate_state);							
+	set_new_state(StateEnum::follower_state);							
 
 
 	receive();

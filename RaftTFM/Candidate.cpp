@@ -192,6 +192,11 @@ void Candidate::dispatch_append_heart_beat(RPC* rpc)
 
 void Candidate::receive(RPC* rpc)
 {
+	dispatch(rpc);
+}
+
+void Candidate::dispatch(RPC* rpc) 
+{
 	std::lock_guard<std::mutex> locker_new_state(mu_candidate_);
 
 	if ((!there_is_leader_) && (!have_to_die_)) {
@@ -209,7 +214,8 @@ void Candidate::receive(RPC* rpc)
 		else if (rpc->rpc_type == RPCTypeEnum::rpc_append_heart_beat) {
 			dispatch_append_heart_beat(rpc);
 		}
+		else
+			Log::trace("Candidate::dispatch - Wrong!!! type " + std::to_string(static_cast<int>(rpc->rpc_type)) + "\r\n");
+
 	}
 }
-
-
