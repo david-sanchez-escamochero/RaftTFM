@@ -154,6 +154,7 @@ void Server::check_new_state()
 					Log::trace("Server(" + std::to_string(server_id_) + ") State changes from " + parse_state_to_string(current_state_) + " to " + parse_state_to_string(new_state_) + "\r\n");
 					current_state_ = new_state_;
 					connector_ = get_current_shape_sever(current_state_);
+
 					connector_->start();
 				}
 			}
