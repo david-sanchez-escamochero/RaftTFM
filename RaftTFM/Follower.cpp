@@ -82,6 +82,7 @@ void Follower::dispatch_append_request_vote(RPC* rpc)
 	{
 		((Server*)server_)->set_current_term(rpc->request_vote.argument_term_);
 		((Server*)server_)->set_voted_for(rpc->request_vote.argument_candidate_id_);
+		Log::trace("(Follower." + std::to_string(((Server*)server_)->get_server_id()) + ") Vote granted to :" + std::to_string(rpc->request_vote.argument_candidate_id_) + "\r\n");
 	}
 
 	
