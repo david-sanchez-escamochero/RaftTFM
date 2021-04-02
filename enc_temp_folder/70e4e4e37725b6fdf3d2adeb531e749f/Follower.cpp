@@ -76,8 +76,8 @@ void Follower::dispatch_append_request_vote(RPC* rpc)
 	if ( 
 		(rpc->request_vote.argument_term_ >= ((Server*)server_)->get_current_term()) && 
 		(rpc->request_vote.argument_candidate_id_ != NONE)							 //&& 
-		//(rpc->request_vote.argument_last_log_index_ == 0)							 && TODO: ?¿?¿?¿?¿?¿?¿?¿?¿?¿?
-		//(rpc->request_vote.argument_last_log_term_ == 0)								TODO: ?¿?¿?¿?¿?¿?¿?¿?¿?¿?¿
+		//(rpc->request_vote.argument_last_log_index_ == 0)							 &&  ?¿?¿?¿?¿?¿?¿?¿?¿?¿?
+		//(rpc->request_vote.argument_last_log_term_ == 0)								 ?¿?¿?¿?¿?¿?¿?¿?¿?¿?¿
 	   )
 	{
 		((Server*)server_)->set_current_term(rpc->request_vote.argument_term_);

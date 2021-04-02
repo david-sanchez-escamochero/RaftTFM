@@ -13,8 +13,8 @@ Server::Server(uint32_t server_id)
 {
 
 	// Persisten state on all servers. 
-	uint32_t current_term_	= 0;							// Latest term server has seen (initialized to 0 on first boot, increases monotonically)
-	uint32_t voted_for_		= 0;							// CandidateId that received vote in current term(or null if none)
+	current_term_			= 0;							// Latest term server has seen (initialized to 0 on first boot, increases monotonically)
+	voted_for_				= NONE;							// CandidateId that received vote in current term(or null if none)
 	memset(log_, 0, sizeof(log_));							// Log entries; each entry contains command for state machine, and term when entry was received by leader(first index is 1)
 
 	// Volatile state on all servers. 
@@ -26,7 +26,7 @@ Server::Server(uint32_t server_id)
 	server_id_				= server_id;
 	have_to_die_			= false;
 
-	voted_for_				= NONE;
+
 		
 	Log::trace("Started server ID:" + std::to_string(server_id_) + "\r\n");
 }
@@ -65,7 +65,7 @@ void Server::start()
 
 
 	// Start new Rol(Follower at the beginning)
-	set_new_state(StateEnum::candidate_state);							
+	set_new_state(StateEnum::follower_state);							
 
 
 	receive();
@@ -199,12 +199,12 @@ uint32_t Server::get_last_applied()
 	return last_applied_;
 }
 
-uint32_t Server::get_voted_for()
+int32_t Server::get_voted_for()
 {
 	return voted_for_;
 }
 
-void Server::set_voted_for(uint32_t vote_for)
+void Server::set_voted_for(int32_t vote_for)
 {
 	voted_for_ = vote_for;
 }

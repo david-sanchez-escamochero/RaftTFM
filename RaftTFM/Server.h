@@ -31,13 +31,13 @@ public:
 	void		set_current_term(uint32_t term);
 	uint32_t	get_commit_index();
 	uint32_t	get_last_applied();
-	uint32_t	get_voted_for();
-	void		set_voted_for(uint32_t vote_for);
+	int32_t		get_voted_for();
+	void		set_voted_for(int32_t vote_for);
 
 protected:
 	// Persisten state on all servers. 
 	uint32_t	current_term_;			// Latest term server has seen (initialized to 0 on first boot, increases monotonically)
-	uint32_t	voted_for_;				// CandidateId that received vote in current term(or null if none)
+	int32_t		voted_for_;				// CandidateId that received vote in current term(or null if none)
 	Command		log_[MAX_LOG_ENTRIES];	// Log entries; each entry contains command for state machine, and term when entry was received by leader(first index is 1)
 
 	// Volatile state on all servers. 
