@@ -23,8 +23,10 @@ Server::Server(uint32_t server_id)
 	current_state_			= StateEnum::unknown_state;		// Starts as unknown. 
 	new_state_				= StateEnum::unknown_state;		// Starts as unknown. 
 	
-	server_id_ = server_id;
-	have_to_die_ = false;
+	server_id_				= server_id;
+	have_to_die_			= false;
+
+	voted_for_				= NONE;
 		
 	Log::trace("Started server ID:" + std::to_string(server_id_) + "\r\n");
 }
@@ -63,7 +65,7 @@ void Server::start()
 
 
 	// Start new Rol(Follower at the beginning)
-	set_new_state(StateEnum::follower_state);							
+	set_new_state(StateEnum::candidate_state);							
 
 
 	receive();
@@ -195,5 +197,15 @@ uint32_t Server::get_commit_index()
 uint32_t Server::get_last_applied()
 {
 	return last_applied_;
+}
+
+uint32_t Server::get_voted_for()
+{
+	return voted_for_;
+}
+
+void Server::set_voted_for(uint32_t vote_for)
+{
+	voted_for_ = vote_for;
 }
 

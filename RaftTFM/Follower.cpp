@@ -11,7 +11,6 @@ Follower::Follower(void* server)
 	Log::trace("(Follower." + std::to_string(((Server*)server_)->get_server_id()) + ") I am a Follower\r\n");
 	have_to_die_									= false;
 	receiving_heartbeats_							= ELECTION_TIME_OUT; // Tries alllowed without receiving heartbeats 
-	i_have_already_voted_							= false;	
 	last_time_stam_taken_miliseconds_				= duration_cast<milliseconds>(system_clock::now().time_since_epoch());	
 	count_check_if_there_is_candidate_or_leader_	= 0;
 }
@@ -56,21 +55,36 @@ void Follower::check_if_there_is_candidate_or_leader()
 
 void Follower::dispatch_append_request_vote(RPC* rpc)
 {
-	// If my term is out of date...
-	if (rpc->request_vote.argument_term_ > ((Server*)server_)->get_current_term()) {
+	// Set as result. 
+	rpc->rpc_direction = RPCDirection::rpc_out_result;
+
+	// If term is out of date
+	if (rpc->request_vote.argument_term_ < ((Server*)server_)->get_current_term()){ 
+		rpc->request_vote.result_term_ = false;
+		rpc->request_vote.result_term_ = ((Server*)server_)->get_current_term();
+		Log::trace("(Follower." + std::to_string(((Server*)server_)->get_server_id()) + ") Term is out of date " + std::to_string(rpc->request_vote.argument_term_) + " < " + std::to_string(((Server*)server_)->get_current_term()) +"\r\n");
+	}
+	// I have already voted.
+	else if ( ((Server*)server_)->get_voted_for() != NONE ){
+		rpc->request_vote.result_term_ = false;
+		rpc->request_vote.result_term_ = ((Server*)server_)->get_current_term();
+		Log::trace("(Follower." + std::to_string(((Server*)server_)->get_server_id()) + ") I have already voted:" + std::to_string(((Server*)server_)->get_voted_for()) + "\r\n");
+	}
+	// Candidate's term is updated...
+	// CandidateID is not null. 
+	// Candidate's log is at least as up-to-date receivers's log, grant vote.
+	if ( 
+		(rpc->request_vote.argument_term_ >= ((Server*)server_)->get_current_term()) && 
+		(rpc->request_vote.argument_candidate_id_ != NONE)							 //&& 
+		//(rpc->request_vote.argument_last_log_index_ == 0)							 &&  ?¿?¿?¿?¿?¿?¿?¿?¿?¿?
+		//(rpc->request_vote.argument_last_log_term_ == 0)								 ?¿?¿?¿?¿?¿?¿?¿?¿?¿?¿
+	   )
+	{
 		((Server*)server_)->set_current_term(rpc->request_vote.argument_term_);
-		i_have_already_voted_ = false;
+		((Server*)server_)->set_voted_for(rpc->request_vote.argument_candidate_id_);
 	}
 
-	rpc->rpc_direction = RPCDirection::rpc_out_result;
-	// If term is out of date, or I have already voted. 
-	if(  (rpc->request_vote.argument_term_ < ((Server*)server_)->get_current_term()) || (i_have_already_voted_) )  {		
-		rpc->request_vote.result_term_ = false;		
-	}	
-	else {
-		rpc->request_vote.result_term_ = true;
-		i_have_already_voted_ = true;
-	}	
+	
 }
 
 void Follower::send(RPC* rpc, unsigned short port, std::string sender, std::string action, std::string receiver)

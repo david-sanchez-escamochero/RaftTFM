@@ -29,8 +29,7 @@ protected:
 	void			dispatch(RPC* rpc);
 	void			check_if_there_is_candidate_or_leader();
 	uint32_t		receiving_heartbeats_;	
-	void			dispatch_append_request_vote(RPC *rpc);
-	bool			i_have_already_voted_;
+	void			dispatch_append_request_vote(RPC *rpc);	
 	milliseconds	last_time_stam_taken_miliseconds_;
 	std::mutex		mu_follower_;
 	uint32_t		count_check_if_there_is_candidate_or_leader_;
