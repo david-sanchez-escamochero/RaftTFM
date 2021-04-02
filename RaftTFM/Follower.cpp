@@ -18,6 +18,7 @@ Follower::Follower(void* server)
 Follower::~Follower()
 {
 	have_to_die_ = true;
+
 	//std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 	if (thread_check_candidate_.joinable()) {
 		thread_check_candidate_.join();
@@ -36,16 +37,19 @@ void Follower::check_if_there_is_candidate_or_leader()
 	count_check_if_there_is_candidate_or_leader_ = 0;
 	while (!have_to_die_) {
 		{
-			std::lock_guard<std::mutex> locker(mu_follower_);
-			milliseconds current_time_stam_taken_miliseconds = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
+			std::lock_guard<std::mutex> locker(mu_follower_); 
 
-			Log::trace("(Follower." + std::to_string(((Server*)server_)->get_server_id()) + ") Waiting if there is candidate or leader " + std::to_string(count_check_if_there_is_candidate_or_leader_++) + "...\r\n");
+			if (!have_to_die_) {
+				milliseconds current_time_stam_taken_miliseconds = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
 
-			if ((abs(last_time_stam_taken_miliseconds_.count() - current_time_stam_taken_miliseconds.count())) > TIME_OUT_CHECK_IF_THERE_IS_CANDIDATE_OR_LEADER)
-			{
-				Log::trace("(Follower." + std::to_string(((Server*)server_)->get_server_id()) + ") Time out without receiving messages from Candidate or Leader\r\n");
-				((Server*)server_)->set_new_state(StateEnum::candidate_state);
-				have_to_die_ = true;
+				Log::trace("(Follower." + std::to_string(((Server*)server_)->get_server_id()) + ") Waiting if there is candidate or leader " + std::to_string(count_check_if_there_is_candidate_or_leader_++) + "...\r\n");
+
+				if ((abs(last_time_stam_taken_miliseconds_.count() - current_time_stam_taken_miliseconds.count())) > TIME_OUT_CHECK_IF_THERE_IS_CANDIDATE_OR_LEADER)
+				{
+					Log::trace("(Follower." + std::to_string(((Server*)server_)->get_server_id()) + ") Time out without receiving messages from Candidate or Leader\r\n");
+					((Server*)server_)->set_new_state(StateEnum::candidate_state);
+					have_to_die_ = true;
+				}
 			}
 		}
 		std::this_thread::sleep_for(std::chrono::milliseconds(TIME_OUT_IF_THERE_IS_CANDIDATE_OR_LEADER));		
@@ -102,31 +106,34 @@ void Follower::receive(RPC* rpc)
 void Follower::dispatch(RPC* rpc) 
 {
 	std::lock_guard<std::mutex> locker(mu_follower_);
-	last_time_stam_taken_miliseconds_ = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
-	count_check_if_there_is_candidate_or_leader_ = 0;
+	
+	if (!have_to_die_) {
+		last_time_stam_taken_miliseconds_ = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
+		count_check_if_there_is_candidate_or_leader_ = 0;
 
-	if (rpc->rpc_direction == RPCDirection::rpc_in_invoke) {
-		switch (rpc->rpc_type)
-		{
+		if (rpc->rpc_direction == RPCDirection::rpc_in_invoke) {
+			switch (rpc->rpc_type)
+			{
 			case RPCTypeEnum::rpc_append_entry:
 				break;
 			case RPCTypeEnum::rpc_append_request_vote:
 				dispatch_append_request_vote(rpc);
 				send(rpc,
 					PORT_BASE + RECEIVER_PORT + rpc->request_vote.argument_candidate_id_,
-					std::string(SERVER) + "(F)." + std::to_string(((Server*)server_)->get_server_id()),					
+					std::string(SERVER) + "(F)." + std::to_string(((Server*)server_)->get_server_id()),
 					std::string(REQUEST_VOTE) + std::string("(") + std::string(RESULT) + std::string(")"),
 					std::string(SERVER) + "(C)." + std::to_string(rpc->request_vote.argument_candidate_id_)
-				);																				
+				);
 				break;
 			case RPCTypeEnum::rpc_append_heart_beat:
 				break;
 			default:
 				break;
-		}		
-	}
-	else {
-		Log::trace("Follower::dispatch - Wrong!!! direction of message " + std::to_string(static_cast<int>(rpc->rpc_direction)) + "\r\n");
+			}
+		}
+		else {
+			Log::trace("Follower::dispatch - Wrong!!! direction of message " + std::to_string(static_cast<int>(rpc->rpc_direction)) + "\r\n");
+		}
 	}
 }
 
