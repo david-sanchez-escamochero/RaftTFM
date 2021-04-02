@@ -64,7 +64,7 @@ void Candidate::send_request_vote_to_all_servers()
 				}
 			}
 		}
-		std::this_thread::sleep_for(std::chrono::milliseconds(TIME_OUT_WAIT_ANY_SERVER_REPLY_REQUEST_VOTE));
+		std::this_thread::sleep_for(std::chrono::milliseconds(TIME_OUT_TERM));
 		{
 			//std::lock_guard<std::mutex> locker_new_state(mu_candidate_);
 			if ((!there_is_leader_) && (!have_to_die_)) {
