@@ -18,11 +18,12 @@ Follower::Follower(void* server)
 Follower::~Follower()
 {
 	have_to_die_ = true;
-
-	//std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+	
+	Log::trace("(Follower." + std::to_string(((Server*)server_)->get_server_id()) + ") Destroying...\r\n");
 	if (thread_check_candidate_.joinable()) {
 		thread_check_candidate_.join();
 	}
+	Log::trace("(Follower." + std::to_string(((Server*)server_)->get_server_id()) + ") Destroyed...\r\n");
 }
 
 

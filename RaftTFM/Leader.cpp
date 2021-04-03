@@ -14,12 +14,16 @@ Leader::~Leader()
 {
 	have_to_die_ = true;
 
+	cv_send_heart_beat_all_servers_.notify_all();
+
+	Log::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") Destroying...\r\n");
 	if (thread_send_heart_beat_all_servers_.joinable())
 		thread_send_heart_beat_all_servers_.join();
 
 	if (thread_check_leader_time_out_to_change_term_.joinable())
 		thread_check_leader_time_out_to_change_term_.join();
 
+	Log::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") Destroyed...\r\n");
 }
 
 void Leader::start()
@@ -93,7 +97,13 @@ void Leader::send_heart_beat_all_servers()
 				}
 			}
 		}
-		std::this_thread::sleep_for(std::chrono::milliseconds(TIME_OUT_HEART_BEAT));
+
+		{
+			//std::this_thread::sleep_for(std::chrono::milliseconds(TIME_OUT_HEART_BEAT));
+			std::mutex mtx;
+			std::unique_lock<std::mutex> lck(mtx);
+			cv_send_heart_beat_all_servers_.wait_for(lck, std::chrono::milliseconds(TIME_OUT_HEART_BEAT));
+		}
 	}
 	
 

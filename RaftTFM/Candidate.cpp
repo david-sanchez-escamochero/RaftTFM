@@ -14,9 +14,13 @@ Candidate::Candidate(void* server)
 Candidate::~Candidate()
 {
 	have_to_die_ = true;
+	cv_send_request_vote_to_all_servers_.notify_all();
 
+
+	Log::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") Destroying...\r\n");
 	if (thread_send_request_vote_to_all_servers_.joinable())
 		thread_send_request_vote_to_all_servers_.join();
+	Log::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") Destroyed...\r\n");
 }
 
 void Candidate::start()
@@ -65,7 +69,14 @@ void Candidate::send_request_vote_to_all_servers()
 				}
 			}
 		}
-		std::this_thread::sleep_for(std::chrono::milliseconds(TIME_OUT_TERM));
+
+		{			
+			std::mutex mtx;
+			std::unique_lock<std::mutex> lck(mtx);
+			cv_send_request_vote_to_all_servers_.wait_for(lck, std::chrono::milliseconds(TIME_OUT_TERM));
+		}
+
+		
 		{
 			//std::lock_guard<std::mutex> locker_new_state(mu_candidate_);
 			if ((!there_is_leader_) && (!have_to_die_)) {
