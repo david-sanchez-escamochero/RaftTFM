@@ -7,7 +7,7 @@ Candidate::Candidate(void* server)
 	Log::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") I am a CANDIDATE\r\n");
 	there_is_leader_		= false;
 	have_to_die_			= false;
-	receive_votes_			= 1; // Starts in 1, because we dont send messages to myself. 	
+	received_votes_			= 1; // Starts in 1, because we dont send messages to myself. 	
 	((Server*)server_)->increment_current_term();
 }
 
@@ -31,7 +31,7 @@ void Candidate::start()
 
 void Candidate::reset_receive_votes() 
 {
-	receive_votes_ = 0; 
+	received_votes_ = 0; 
 }
 
 void Candidate::send_request_vote_to_all_servers() 
@@ -82,6 +82,8 @@ void Candidate::send_request_vote_to_all_servers()
 			if ((!there_is_leader_) && (!have_to_die_)) {
 				// Increments term. 
 				((Server*)server_)->increment_current_term();
+				// Reset received votes. 
+				received_votes_ = 0;
 				// wait ramdomly. 
 				/* initialize random seed: */
 				srand((unsigned int)time(NULL));
@@ -179,10 +181,10 @@ void Candidate::dispatch_request_vote(RPC* rpc)
 	else if ((rpc->rpc_direction == RPCDirection::rpc_out_result)) {
 		// If someone voted for me. 
 		if ((bool)rpc->request_vote.result_term_ == true) {
-			receive_votes_++;
+			received_votes_++;
 			// If I wins election. 	
-			if (receive_votes_ >= MAJORITY) {
-				Log::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") I have received just mayority of request vote: " + std::to_string(receive_votes_) + "\r\n");
+			if (received_votes_ >= MAJORITY) {
+				Log::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") I have received just mayority of request vote: " + std::to_string(received_votes_) + "\r\n");
 				((Server*)server_)->set_new_state(StateEnum::leader_state);
 				there_is_leader_ = true;
 			}

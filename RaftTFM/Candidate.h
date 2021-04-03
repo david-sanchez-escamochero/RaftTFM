@@ -23,7 +23,7 @@ protected:
 	bool		there_is_leader_;
 	bool		have_to_die_;
 	void		reset_receive_votes();
-	uint32_t	receive_votes_;
+	uint32_t	received_votes_;
 	std::mutex	mu_candidate_;
 
 
