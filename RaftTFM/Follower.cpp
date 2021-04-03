@@ -124,6 +124,18 @@ void Follower::dispatch_request_vote(RPC* rpc) {
 void Follower::dispatch_append_heart_beat(RPC* rpc) 
 {
 	if (rpc->rpc_direction == RPCDirection::rpc_in_invoke) {
+
+		Log::trace("(Follower." + std::to_string(((Server*)server_)->get_server_id()) + ") Heart beat from Leader." + std::to_string(rpc->append_entry.argument_leader_id_) + "\r\n");
+
+		rpc->rpc_direction = RPCDirection::rpc_out_result;
+		rpc->append_entry.result_success_ = true;
+
+		send(rpc,
+			PORT_BASE + RECEIVER_PORT + rpc->append_entry.argument_leader_id_,
+			std::string(SERVER) + "(F)." + std::to_string(((Server*)server_)->get_server_id()),
+			std::string(HEART_BEAT) + std::string("(") + std::string(RESULT) + std::string(")"),
+			std::string(SERVER) + "(L)." + std::to_string(rpc->append_entry.argument_leader_id_)
+		);
 	}
 	else if (rpc->rpc_direction == RPCDirection::rpc_out_result) {
 	}

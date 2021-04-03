@@ -140,6 +140,10 @@ void Leader::dispatch_append_heart_beat(RPC* rpc)
 	if (rpc->rpc_direction == RPCDirection::rpc_in_invoke) {
 	}
 	else if (rpc->rpc_direction == RPCDirection::rpc_out_result) {
+		if(rpc->append_entry.result_success_ == (uint32_t)true)
+			Log::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") ACK heart beat Server\r\n");
+		else 
+			Log::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") FAILED!!! ACK heart beat Server\r\n");
 	}
 }
 
