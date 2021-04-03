@@ -111,6 +111,7 @@ void Leader::send_heart_beat_all_servers()
 
 void Leader::send(RPC* rpc, unsigned short port, std::string sender, std::string action, std::string receiver)
 {
+	((Server*)server_)->send(rpc, port, sender, action, receiver);
 }
 
 void Leader::receive(RPC* rpc)

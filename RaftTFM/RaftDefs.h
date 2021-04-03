@@ -15,7 +15,7 @@ enum class StateEnum { follower_state, leader_state, candidate_state, unknown_st
 #define	TIME_OUT_CHECK_IF_THERE_IS_CANDIDATE_OR_LEADER			15000//(ms)
 #define	TIME_OUT_IF_THERE_IS_CANDIDATE_OR_LEADER				1000//(ms)
 #define	TIME_OUT_TERM											10000//(ms)
-#define TIME_OUT_HEART_BEAT										5000//(ms)
+#define TIME_OUT_HEART_BEAT										2000//(ms)
 #define TIME_OUT_LEADER_TERM									60000//(ms)
 #define TIME_OUT_WAIT											2000//(ms)
 
