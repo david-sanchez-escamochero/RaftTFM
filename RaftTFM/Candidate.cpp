@@ -87,8 +87,8 @@ void Candidate::send_request_vote_to_all_servers()
 				// wait ramdomly. 
 				/* initialize random seed: */
 				srand((unsigned int)time(NULL));
-				// 150-300(ms)
-				uint32_t ramdom_timeout = rand() % MINIMUM_VALUE_RAMDOM_TIME_OUT + MINIMUM_VALUE_RAMDOM_TIME_OUT;
+				// 150-300(ms). 
+				uint32_t ramdom_timeout = ( rand() % MINIMUM_VALUE_RAMDOM_TIME_OUT ) + MINIMUM_VALUE_RAMDOM_TIME_OUT;
 				std::this_thread::sleep_for(std::chrono::milliseconds(ramdom_timeout));
 			}
 		}
@@ -103,38 +103,44 @@ void Candidate::send(RPC* rpc, unsigned short port, std::string sender, std::str
 
 void Candidate::dispatch_append_entry(RPC* rpc)
 {
-	// And its terms is equal or highest than mine... 
-	if (rpc->append_entry.argument_term_ >= ((Server*)server_)->get_current_term()) {
-		Log::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") [Accepted]received an append_entry[term:" + std::to_string(rpc->append_entry.argument_term_) + " >= current_term:" + std::to_string(((Server*)server_)->get_current_term()) + "]\r\n");
-		// Inform server that state has changed to follower.  
-		((Server*)server_)->set_new_state(StateEnum::follower_state);
+	if (rpc->rpc_direction == RPCDirection::rpc_in_invoke) {
+		// And its terms is equal or highest than mine... 
+		if (rpc->append_entry.argument_term_ >= ((Server*)server_)->get_current_term()) {
+			Log::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") [Accepted]received an append_entry claiming to be leader[term:" + std::to_string(rpc->append_entry.argument_term_) + " >= current_term:" + std::to_string(((Server*)server_)->get_current_term()) + "]\r\n");
 
-		rpc->rpc_direction = RPCDirection::rpc_out_result;
-		rpc->append_entry.result_success_ = true;
-		rpc->server_id_origin = ((Server*)server_)->get_server_id();
-		rpc->server_id_target = rpc->append_entry.argument_leader_id_;
+			rpc->rpc_direction = RPCDirection::rpc_out_result;
+			rpc->append_entry.result_success_ = true;
+			rpc->server_id_origin = ((Server*)server_)->get_server_id();
+			rpc->server_id_target = rpc->append_entry.argument_leader_id_;
 
-		send(rpc,
-			PORT_BASE + RECEIVER_PORT + rpc->append_entry.argument_leader_id_,
-			std::string(SERVER) + "(C)." + std::to_string(((Server*)server_)->get_server_id()),
-			std::string(APPEND_ENTRY) + std::string("(") + std::string(RESULT) + std::string(")"),
-			std::string(SERVER) + "(C)." + std::to_string(rpc->append_entry.argument_leader_id_)
-		);
-		have_to_die_ = true;
-		there_is_leader_ = true;
+			send(rpc,
+				PORT_BASE + RECEIVER_PORT + rpc->append_entry.argument_leader_id_,
+				std::string(SERVER) + "(C)." + std::to_string(((Server*)server_)->get_server_id()),
+				std::string(APPEND_ENTRY) + std::string("(") + std::string(RESULT) + std::string(")"),
+				std::string(SERVER) + "(C)." + std::to_string(rpc->append_entry.argument_leader_id_)
+			);
+			have_to_die_ = true;
+			there_is_leader_ = true;
+
+			// Inform server that state has changed to follower.  
+			((Server*)server_)->set_new_state(StateEnum::follower_state);
+		}
+		// Reject...
+		else {
+			Log::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") [Rejected] received an append_entry claiming to be leader[term:" + std::to_string(rpc->append_entry.argument_term_) + " < current_term:" + std::to_string(((Server*)server_)->get_current_term()) + "]\r\n");
+			rpc->rpc_direction = RPCDirection::rpc_out_result;
+			rpc->append_entry.result_success_ = false;
+
+			send(rpc,
+				PORT_BASE + RECEIVER_PORT + rpc->append_entry.argument_leader_id_,
+				std::string(SERVER) + "(C)." + std::to_string(((Server*)server_)->get_server_id()),
+				std::string(APPEND_ENTRY) + std::string("(") + std::string(RESULT) + std::string(")"),
+				std::string(SERVER) + "(C)." + std::to_string(rpc->append_entry.argument_leader_id_)
+			);
+		}
 	}
-	// Reject...
-	else {
-		Log::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") [Rejected] received an append_entry[term:" + std::to_string(rpc->append_entry.argument_term_) + " < current_term:" + std::to_string(((Server*)server_)->get_current_term()) + "]\r\n");
-		rpc->rpc_direction = RPCDirection::rpc_out_result;
-		rpc->append_entry.result_success_ = false;
-
-		send(rpc,
-			PORT_BASE + RECEIVER_PORT + rpc->append_entry.argument_leader_id_,
-			std::string(SERVER) + "(C)." + std::to_string(((Server*)server_)->get_server_id()),
-			std::string(APPEND_ENTRY) + std::string("(") + std::string(RESULT) + std::string(")"),
-			std::string(SERVER) + "(C)." + std::to_string(rpc->append_entry.argument_leader_id_)
-		);
+	else if ((rpc->rpc_direction == RPCDirection::rpc_out_result)) 
+	{
 	}
 }
 
@@ -144,8 +150,6 @@ void Candidate::dispatch_request_vote(RPC* rpc)
 		// And its terms is equal or highest than mine... 
 		if (rpc->request_vote.argument_term_ >= ((Server*)server_)->get_current_term()) {
 			Log::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") [Accepted]received an request_vote[term:" + std::to_string(rpc->request_vote.argument_term_) + " >= current_term:" + std::to_string(((Server*)server_)->get_current_term()) + "]\r\n");
-			// Inform server that state has changed to follower.  
-			((Server*)server_)->set_new_state(StateEnum::follower_state);
 
 			rpc->rpc_direction = RPCDirection::rpc_out_result;
 			rpc->request_vote.result_vote_granted_ = true;
@@ -158,6 +162,9 @@ void Candidate::dispatch_request_vote(RPC* rpc)
 				std::string(REQUEST_VOTE) + std::string("(") + std::string(RESULT) + std::string(")"),
 				std::string(SERVER) + "(C)." + std::to_string(rpc->append_entry.argument_leader_id_)
 			);
+
+			// Inform server that state has changed to follower.  
+			((Server*)server_)->set_new_state(StateEnum::follower_state);
 		}
 		// Reject...
 		else {

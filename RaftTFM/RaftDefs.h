@@ -11,7 +11,7 @@ enum class StateEnum { follower_state, leader_state, candidate_state, unknown_st
 #define RECEIVER_PORT											200
 #define MAJORITY												2//( ( NUM_SERVERS % 2 ) + 1 ) - 1  // -1 Because I do not send message to myself.
 #define ELECTION_TIME_OUT										3//(s) 	A follower receives no communication over a period of time. 	
-#define	MINIMUM_VALUE_RAMDOM_TIME_OUT							1000//(ms)
+#define	MINIMUM_VALUE_RAMDOM_TIME_OUT							150//(ms)
 #define	TIME_OUT_CHECK_IF_THERE_IS_CANDIDATE_OR_LEADER			15000//(ms)
 #define	TIME_OUT_IF_THERE_IS_CANDIDATE_OR_LEADER				1000//(ms)
 #define	TIME_OUT_TERM											10000//(ms)
