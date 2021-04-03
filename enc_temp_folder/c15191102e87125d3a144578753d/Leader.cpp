@@ -90,7 +90,7 @@ void Leader::send_heart_beat_all_servers()
 						send(&rpc,
 							PORT_BASE + RECEIVER_PORT + count,
 							std::string(SERVER) + "(L)." + std::to_string(((Server*)server_)->get_server_id()),
-							std::string(HEART_BEAT) + std::string("(") + std::string(INVOKE) + std::string(")"),
+							std::string(REQUEST_VOTE) + std::string("(") + std::string(INVOKE) + std::string(")"),
 							std::string(SERVER) + "(ALL)." + std::to_string(count)
 						);
 						Log::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") Sent Heart-beat to Server." + std::to_string(count)+ "\r\n");
