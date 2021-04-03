@@ -42,7 +42,7 @@ void Candidate::send_request_vote_to_all_servers()
 		for (uint32_t count = 0; count < NUM_SERVERS; count++) 
 		{
 			{
-				std::lock_guard<std::mutex> locker_new_state(mu_candidate_);
+				std::lock_guard<std::mutex> locker_candidate(mu_candidate_);
 				
 
 				if ((!there_is_leader_) && (!have_to_die_)) {
@@ -78,7 +78,7 @@ void Candidate::send_request_vote_to_all_servers()
 
 		
 		{
-			//std::lock_guard<std::mutex> locker_new_state(mu_candidate_);
+			//std::lock_guard<std::mutex> locker_candidate(mu_candidate_);
 			if ((!there_is_leader_) && (!have_to_die_)) {
 				// Increments term. 
 				((Server*)server_)->increment_current_term();
@@ -208,7 +208,7 @@ void Candidate::receive(RPC* rpc)
 
 void Candidate::dispatch(RPC* rpc) 
 {
-	std::lock_guard<std::mutex> locker_new_state(mu_candidate_);
+	std::lock_guard<std::mutex> locker_candidate(mu_candidate_);
 
 	if ((!there_is_leader_) && (!have_to_die_)) {
 		// If I receive an append_entry(// Another server establishes itself as a leader. )
