@@ -148,7 +148,7 @@ void Server::check_new_state()
 		semaphore_new_state_.wait(SEMAPHORE_SERVER_NEW_STATE);
 		{
 			{
-				std::lock_guard<std::mutex> locker_new_state(mu_new_state_);
+				//std::lock_guard<std::mutex> locker_new_state(mu_new_state_);
 				std::lock_guard<std::mutex> locker(mu_server_);
 				if (current_state_ != new_state_) {
 					Log::trace("Server(" + std::to_string(server_id_) + ") State changes from " + parse_state_to_string(current_state_) + " to " + parse_state_to_string(new_state_) + "\r\n");
@@ -166,7 +166,7 @@ void Server::check_new_state()
 void Server::set_new_state(StateEnum state)
 {			
 	{
-		std::lock_guard<std::mutex> locker_new_state(mu_new_state_);
+		//std::lock_guard<std::mutex> locker_new_state(mu_new_state_);
 		Log::trace("Server(" + std::to_string(server_id_) + ") New state has been requested\r\n");
 		new_state_ = state;
 		semaphore_new_state_.notify(SEMAPHORE_SERVER_NEW_STATE);
