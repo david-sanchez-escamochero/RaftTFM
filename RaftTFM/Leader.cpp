@@ -35,14 +35,17 @@ void Leader::start()
 
 void Leader::check_leader_time_out_to_change_term() 
 {
-	uint32_t count_term = 0;
+	uint32_t count_term = (TIME_OUT_LEADER_TERM / 1000);
 	milliseconds last_time_stamp_taken_miliseconds_ = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
 
 	while (!have_to_die_) {
 		{
 			std::lock_guard<std::mutex> locker_leader(mu_leader_);
 			milliseconds current_time_stam_taken_miliseconds = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
-			Log::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") Count term:" + std::to_string(count_term) + " \r\n");
+
+			count_term = count_term - (TIME_OUT_WAIT / 1000);
+
+			Log::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") Count term["+std::to_string(TIME_OUT_LEADER_TERM/1000)+"]:" + std::to_string(count_term) + " \r\n");
 
 			if ((abs(last_time_stamp_taken_miliseconds_.count() - current_time_stam_taken_miliseconds.count())) > TIME_OUT_LEADER_TERM) {
 				Log::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") TERM was finished\r\n");
