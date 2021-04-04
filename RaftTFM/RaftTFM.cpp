@@ -7,6 +7,7 @@
 #include <string>
 #include "Communication.h"
 #include "RPC.h"
+#include "Client.h"
 
 
 
@@ -19,24 +20,23 @@ int main(int argc, char** argv)
         printf("Example RaftTest.exe 1\r\n");
     }
     else {
-        Server server(std::stoi(argv[1]));
-        server.start();
-
-
-        // Test(sender)
-        //Communication communication;
-        //RPC rpc;
-        //rpc.rpc_type = RPCTypeEnum::rpc_append_request_vote;
-        //rpc.rpc_direction = RPCDirection::rpc_out_result;
-        //communication.sendMessage(&rpc, 6000, "", "", "");
-
-
-        // Test(receiver)
-        //Communication communication;
-        //RPC rpc;
-        //communication.receiveMessage(&rpc, 6000, "");
+        // If it is a Client. 
+        if ( std::stoi(argv[1]) > NUM_SERVERS ) {
+            Log::trace("*************************\r\n");
+            Log::trace("   Starting RaftClient\r\n");
+            Log::trace("************************\r\n");
+            Client client;
+            if (!client.start("C:\\Users\\ASUS_PORTATIL\\source\\repos\\RaftClient\\RaftClient\\names_starts_with_A.txt", std::stoi(argv[1])))
+                Log::trace("RaftClient - Failed to start. \r\n");
+        }
+        // If it is a Server. 
+        else {
+            Server server(std::stoi(argv[1]));
+            server.start();
+        }
     }    
 }
+
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
 // Debug program: F5 or Debug > Start Debugging menu

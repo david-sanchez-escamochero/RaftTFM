@@ -150,6 +150,7 @@
   <ItemGroup>
     <ClCompile Include="AppendEntry.cpp" />
     <ClCompile Include="Candidate.cpp" />
+    <ClCompile Include="Client.cpp" />
     <ClCompile Include="ClientRequest.cpp" />
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="Follower.cpp" />
@@ -164,6 +165,8 @@
   <ItemGroup>
     <ClInclude Include="AppendEntry.h" />
     <ClInclude Include="Candidate.h" />
+    <ClInclude Include="Client.h" />
+    <ClInclude Include="ClientDefs.h" />
     <ClInclude Include="ClientRequest.h" />
     <ClInclude Include="Command.h" />
     <ClInclude Include="Follower.h" />

@@ -33,6 +33,8 @@ protected:
 	void					dispatch_append_entry(RPC* rpc);
 	void					dispatch_request_vote(RPC* rpc);
 	void					dispatch_append_heart_beat(RPC* rpc);
+	void					dispatch_client_request_leader(RPC* rpc);
+	void					dispatch_client_request_value(RPC* rpc);
 	std::thread				thread_send_heart_beat_all_servers_;
 	std::thread				thread_check_leader_time_out_to_change_term_;
 	void					send_heart_beat_all_servers();

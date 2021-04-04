@@ -152,6 +152,39 @@ void Leader::dispatch_append_heart_beat(RPC* rpc)
 	}
 }
 
+void Leader::dispatch_client_request_leader(RPC* rpc)
+{
+	if (rpc->rpc_direction == RPCDirection::rpc_in_invoke) {
+		// Actually we are Leader, so we reply with our id.
+		rpc->rpc_direction = RPCDirection::rpc_out_result;
+		rpc->client_request.client_result = true;
+		rpc->client_request.client_leader = ((Server*)server_)->get_server_id();	
+
+		//send(&rpc,
+		//	PORT_BASE + RECEIVER_PORT + count,
+		//	std::string(SERVER) + "(L)." + std::to_string(((Server*)server_)->get_server_id()),
+		//	std::string(HEART_BEAT) + std::string("(") + std::string(INVOKE) + std::string(")"),
+		//	std::string(SERVER) + "(ALL)." + std::to_string(count)
+		//);
+	}
+	else if (rpc->rpc_direction == RPCDirection::rpc_out_result) {
+		// N/A
+	}
+
+}
+
+void Leader::dispatch_client_request_value(RPC* rpc)
+{
+	if (rpc->rpc_direction == RPCDirection::rpc_in_invoke) {
+	}
+	else if (rpc->rpc_direction == RPCDirection::rpc_out_result) {
+		if (rpc->append_entry.result_success_ == (uint32_t)true)
+			Log::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") ACK heart beat Server\r\n");
+		else
+			Log::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") FAILED!!! ACK heart beat Server\r\n");
+	}
+}
+
 
 void Leader::dispatch(RPC* rpc)
 {
@@ -171,6 +204,13 @@ void Leader::dispatch(RPC* rpc)
 		// Another server establishes itself as a leader. 
 		else if (rpc->rpc_type == RPCTypeEnum::rpc_append_heart_beat) {
 			dispatch_append_heart_beat(rpc);
+		}
+		// A client request a leader
+		else if (rpc->rpc_type == RPCTypeEnum::rpc_client_request_leader) {
+			dispatch_client_request_leader(rpc);
+		}
+		else if (rpc->rpc_type == RPCTypeEnum::rpc_client_request_value) {
+			dispatch_client_request_value(rpc);
 		}
 		else
 			Log::trace("Leader::dispatch - Wrong!!! type " + std::to_string(static_cast<int>(rpc->rpc_type)) + "\r\n");
