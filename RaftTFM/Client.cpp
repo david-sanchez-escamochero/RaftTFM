@@ -61,10 +61,10 @@ void* Client::receive()
 {
     while (!have_to_die_) {
         RPC rpc;
-        int error = communication_.receiveMessage(&rpc, PORT_BASE + RECEIVER_PORT + client_id_, LEADER);
+        int error = communication_.receiveMessage(&rpc, BASE_PORT + RECEIVER_PORT + client_id_, LEADER_TEXT);
 
         if (error) {
-            Log::trace("Follower::receive - FAILED!!!  - error" + std::to_string(error) + "\r\n");
+            Tracer::trace("Follower::receive - FAILED!!!  - error" + std::to_string(error) + "\r\n");
         }
         else {                        
             if (
@@ -97,9 +97,9 @@ void Client::send_request_to_find_a_leader(uint32_t num_server) {
     int ret = NO_LEADER_FOUND;
     
     
-    ret = communication_.sendMessage(&rpc, PORT_BASE + RECEIVER_PORT + num_server, CLIENT_TEXT, CLIENT_REQUEST_TEXT, LEADER);
+    ret = communication_.sendMessage(&rpc, BASE_PORT + RECEIVER_PORT + num_server, CLIENT_TEXT, CLIENT_REQUEST_TEXT, LEADER_TEXT);
     if (ret) {
-        Log::trace("Client - Failed to request leader from server " + std::to_string(num_server) + ", error " + std::to_string(ret) + "\r\n");
+        Tracer::trace("Client - Failed to request leader from server " + std::to_string(num_server) + ", error " + std::to_string(ret) + "\r\n");
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }    
 }
@@ -115,7 +115,7 @@ bool Client::send_request(std::string file_name, uint32_t leader_id)
 
         while (std::getline(infile, value))
         {
-            Log::trace("Value proposed:" + value + "\r\n");
+            Tracer::trace("Value proposed:" + value + "\r\n");
             
             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
             
@@ -130,9 +130,9 @@ bool Client::send_request(std::string file_name, uint32_t leader_id)
                 int ret = 0;
                 do
                 {
-                    int ret = communication_.sendMessage(&rpc, PORT_BASE + RECEIVER_PORT + leader_id, CLIENT_TEXT, CLIENT_REQUEST_TEXT, LEADER);
+                    int ret = communication_.sendMessage(&rpc, BASE_PORT + RECEIVER_PORT + leader_id, CLIENT_TEXT, CLIENT_REQUEST_TEXT, LEADER_TEXT);
                     if (ret) {
-                        Log::trace("Client - Leader does not respond, error: " + std::to_string(ret) + "\r\n");
+                        Tracer::trace("Client - Leader does not respond, error: " + std::to_string(ret) + "\r\n");
                     }
                 } while (ret);
                 {
@@ -149,7 +149,7 @@ bool Client::send_request(std::string file_name, uint32_t leader_id)
         }        
     }
     else {
-        Log::trace("Client::start - FAILED!!! file_name  == '' \r\n");
+        Tracer::trace("Client::start - FAILED!!! file_name  == '' \r\n");
         ret = false;
     }
 

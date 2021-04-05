@@ -1,4 +1,4 @@
-#include "Log.h"
+#include "Tracer.h"
 #include <thread>
 #include <chrono>
 #include <ctime> 
@@ -20,12 +20,12 @@ unsigned long long GetTickCount()
 }
 
 
-Log::Log() 
+Tracer::Tracer() 
 {
 	
 }
 
-void Log::trace(std::string str_log)
+void Tracer::trace(std::string str_log)
 {	
 		static uint32_t count_line_ = 0;
 		//std::lock_guard<std::mutex> guard(mu_); // RAII

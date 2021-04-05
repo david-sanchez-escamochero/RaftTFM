@@ -1,10 +1,10 @@
 #include "Candidate.h"
-#include "Log.h"
+#include "Tracer.h"
 
 Candidate::Candidate(void* server)
 {	
 	server_ = server;	
-	Log::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") I am a CANDIDATE\r\n");
+	Tracer::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") I am a CANDIDATE\r\n");
 	there_is_leader_		= false;
 	have_to_die_			= false;
 	received_votes_			= 1; // Starts in 1, because we dont send messages to myself. 	
@@ -17,10 +17,10 @@ Candidate::~Candidate()
 	cv_send_request_vote_to_all_servers_.notify_all();
 
 
-	Log::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") Destroying...\r\n");
+	Tracer::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") Destroying...\r\n");
 	if (thread_send_request_vote_to_all_servers_.joinable())
 		thread_send_request_vote_to_all_servers_.join();
-	Log::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") Destroyed...\r\n");
+	Tracer::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") Destroyed...\r\n");
 }
 
 void Candidate::start()
@@ -60,10 +60,10 @@ void Candidate::send_request_vote_to_all_servers()
 						rpc.request_vote.argument_last_log_term_ = 0;											// Term of candidate's last log entry (§5.4)
 
 						send(&rpc,
-							PORT_BASE + RECEIVER_PORT + count,
-							std::string(SERVER) + "(C)." + std::to_string(((Server*)server_)->get_server_id()),
-							std::string(REQUEST_VOTE) + std::string("(") + std::string(INVOKE) + std::string(")"),
-							std::string(SERVER) + "(F)." + std::to_string(count)
+							BASE_PORT + RECEIVER_PORT + count,
+							std::string(SERVER_TEXT) + "(C)." + std::to_string(((Server*)server_)->get_server_id()),
+							std::string(REQUEST_VOTE_TEXT) + std::string("(") + std::string(INVOKE_TEXT) + std::string(")"),
+							std::string(SERVER_TEXT) + "(F)." + std::to_string(count)
 						);
 					}
 				}
@@ -93,7 +93,7 @@ void Candidate::send_request_vote_to_all_servers()
 			}
 		}
 	}
-	Log::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") send_request_vote_to_all_servers FINISHED.\r\n");
+	Tracer::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") send_request_vote_to_all_servers FINISHED.\r\n");
 }
 
 void Candidate::send(RPC* rpc, unsigned short port, std::string sender, std::string action, std::string receiver)
@@ -106,7 +106,7 @@ void Candidate::dispatch_append_entry(RPC* rpc)
 	if (rpc->rpc_direction == RPCDirection::rpc_in_invoke) {
 		// And its terms is equal or highest than mine... 
 		if (rpc->append_entry.argument_term_ >= ((Server*)server_)->get_current_term()) {
-			Log::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") [Accepted]received an append_entry claiming to be leader[term:" + std::to_string(rpc->append_entry.argument_term_) + " >= current_term:" + std::to_string(((Server*)server_)->get_current_term()) + "]\r\n");
+			Tracer::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") [Accepted]received an append_entry claiming to be leader[term:" + std::to_string(rpc->append_entry.argument_term_) + " >= current_term:" + std::to_string(((Server*)server_)->get_current_term()) + "]\r\n");
 
 			rpc->rpc_direction = RPCDirection::rpc_out_result;
 			rpc->append_entry.result_success_ = true;
@@ -114,10 +114,10 @@ void Candidate::dispatch_append_entry(RPC* rpc)
 			rpc->server_id_target = rpc->append_entry.argument_leader_id_;
 
 			send(rpc,
-				PORT_BASE + RECEIVER_PORT + rpc->append_entry.argument_leader_id_,
-				std::string(SERVER) + "(C)." + std::to_string(((Server*)server_)->get_server_id()),
-				std::string(APPEND_ENTRY) + std::string("(") + std::string(RESULT) + std::string(")"),
-				std::string(SERVER) + "(C)." + std::to_string(rpc->append_entry.argument_leader_id_)
+				BASE_PORT + RECEIVER_PORT + rpc->append_entry.argument_leader_id_,
+				std::string(SERVER_TEXT) + "(C)." + std::to_string(((Server*)server_)->get_server_id()),
+				std::string(APPEND_ENTRY_TEXT) + std::string("(") + std::string(RESULT_TEXT) + std::string(")"),
+				std::string(SERVER_TEXT) + "(C)." + std::to_string(rpc->append_entry.argument_leader_id_)
 			);
 			have_to_die_ = true;
 			there_is_leader_ = true;
@@ -127,15 +127,15 @@ void Candidate::dispatch_append_entry(RPC* rpc)
 		}
 		// Reject...
 		else {
-			Log::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") [Rejected] received an append_entry claiming to be leader[term:" + std::to_string(rpc->append_entry.argument_term_) + " < current_term:" + std::to_string(((Server*)server_)->get_current_term()) + "]\r\n");
+			Tracer::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") [Rejected] received an append_entry claiming to be leader[term:" + std::to_string(rpc->append_entry.argument_term_) + " < current_term:" + std::to_string(((Server*)server_)->get_current_term()) + "]\r\n");
 			rpc->rpc_direction = RPCDirection::rpc_out_result;
 			rpc->append_entry.result_success_ = false;
 
 			send(rpc,
-				PORT_BASE + RECEIVER_PORT + rpc->append_entry.argument_leader_id_,
-				std::string(SERVER) + "(C)." + std::to_string(((Server*)server_)->get_server_id()),
-				std::string(APPEND_ENTRY) + std::string("(") + std::string(RESULT) + std::string(")"),
-				std::string(SERVER) + "(C)." + std::to_string(rpc->append_entry.argument_leader_id_)
+				BASE_PORT + RECEIVER_PORT + rpc->append_entry.argument_leader_id_,
+				std::string(SERVER_TEXT) + "(C)." + std::to_string(((Server*)server_)->get_server_id()),
+				std::string(APPEND_ENTRY_TEXT) + std::string("(") + std::string(RESULT_TEXT) + std::string(")"),
+				std::string(SERVER_TEXT) + "(C)." + std::to_string(rpc->append_entry.argument_leader_id_)
 			);
 		}
 	}
@@ -149,7 +149,7 @@ void Candidate::dispatch_request_vote(RPC* rpc)
 	if (rpc->rpc_direction == RPCDirection::rpc_in_invoke) {
 		// And its terms is equal or highest than mine... 
 		if (rpc->request_vote.argument_term_ >= ((Server*)server_)->get_current_term()) {
-			Log::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") [Accepted]received an request_vote[term:" + std::to_string(rpc->request_vote.argument_term_) + " >= current_term:" + std::to_string(((Server*)server_)->get_current_term()) + "]\r\n");
+			Tracer::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") [Accepted]received an request_vote[term:" + std::to_string(rpc->request_vote.argument_term_) + " >= current_term:" + std::to_string(((Server*)server_)->get_current_term()) + "]\r\n");
 
 			rpc->rpc_direction = RPCDirection::rpc_out_result;
 			rpc->request_vote.result_vote_granted_ = true;
@@ -157,10 +157,10 @@ void Candidate::dispatch_request_vote(RPC* rpc)
 			rpc->server_id_target = rpc->append_entry.argument_leader_id_;
 
 			send(rpc,
-				PORT_BASE + RECEIVER_PORT + rpc->append_entry.argument_leader_id_,
-				std::string(SERVER) + "(C)." + std::to_string(((Server*)server_)->get_server_id()),
-				std::string(REQUEST_VOTE) + std::string("(") + std::string(RESULT) + std::string(")"),
-				std::string(SERVER) + "(C)." + std::to_string(rpc->append_entry.argument_leader_id_)
+				BASE_PORT + RECEIVER_PORT + rpc->append_entry.argument_leader_id_,
+				std::string(SERVER_TEXT) + "(C)." + std::to_string(((Server*)server_)->get_server_id()),
+				std::string(REQUEST_VOTE_TEXT) + std::string("(") + std::string(RESULT_TEXT) + std::string(")"),
+				std::string(SERVER_TEXT) + "(C)." + std::to_string(rpc->append_entry.argument_leader_id_)
 			);
 
 			// Inform server that state has changed to follower.  
@@ -168,7 +168,7 @@ void Candidate::dispatch_request_vote(RPC* rpc)
 		}
 		// Reject...
 		else {
-			Log::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") [Rejected]received an request_vote[term:" + std::to_string(rpc->request_vote.argument_term_) + " < current_term:" + std::to_string(((Server*)server_)->get_current_term()) + "]\r\n");
+			Tracer::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") [Rejected]received an request_vote[term:" + std::to_string(rpc->request_vote.argument_term_) + " < current_term:" + std::to_string(((Server*)server_)->get_current_term()) + "]\r\n");
 			rpc->rpc_direction = RPCDirection::rpc_out_result;
 			rpc->request_vote.result_vote_granted_ = false;
 			rpc->server_id_origin = ((Server*)server_)->get_server_id();
@@ -176,10 +176,10 @@ void Candidate::dispatch_request_vote(RPC* rpc)
 
 
 			send(rpc,
-				PORT_BASE + RECEIVER_PORT + rpc->append_entry.argument_leader_id_,
-				std::string(SERVER) + "(C)." + std::to_string(((Server*)server_)->get_server_id()),
-				std::string(REQUEST_VOTE) + std::string("(") + std::string(RESULT) + std::string(")"),
-				std::string(SERVER) + "(C)." + std::to_string(rpc->append_entry.argument_leader_id_)
+				BASE_PORT + RECEIVER_PORT + rpc->append_entry.argument_leader_id_,
+				std::string(SERVER_TEXT) + "(C)." + std::to_string(((Server*)server_)->get_server_id()),
+				std::string(REQUEST_VOTE_TEXT) + std::string("(") + std::string(RESULT_TEXT) + std::string(")"),
+				std::string(SERVER_TEXT) + "(C)." + std::to_string(rpc->append_entry.argument_leader_id_)
 			);
 		}
 
@@ -191,21 +191,21 @@ void Candidate::dispatch_request_vote(RPC* rpc)
 			received_votes_++;
 			// If I wins election. 	
 			if (received_votes_ >= MAJORITY) {
-				Log::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") I have received just mayority of request vote: " + std::to_string(received_votes_) + "\r\n");
+				Tracer::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") I have received just mayority of request vote: " + std::to_string(received_votes_) + "\r\n");
 				((Server*)server_)->set_new_state(StateEnum::leader_state);
 				there_is_leader_ = true;
 			}
 		}
 		// If I was rejected. 
 		else {
-			Log::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") Rejected request voted\r\n");
+			Tracer::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") Rejected request voted\r\n");
 		}
 	}
 }
 
 void Candidate::dispatch_append_heart_beat(RPC* rpc) 
 {
-	Log::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") received heart_beat\r\n");
+	Tracer::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") received heart_beat\r\n");
 	((Server*)server_)->set_new_state(StateEnum::follower_state);
 	there_is_leader_ = true;
 }
@@ -235,7 +235,7 @@ void Candidate::dispatch(RPC* rpc)
 			dispatch_append_heart_beat(rpc);
 		}
 		else
-			Log::trace("Candidate::dispatch - Wrong!!! type " + std::to_string(static_cast<int>(rpc->rpc_type)) + "\r\n");
+			Tracer::trace("Candidate::dispatch - Wrong!!! type " + std::to_string(static_cast<int>(rpc->rpc_type)) + "\r\n");
 
 	}
 }

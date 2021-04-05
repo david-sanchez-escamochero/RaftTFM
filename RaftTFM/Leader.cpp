@@ -1,10 +1,11 @@
 #include "Leader.h"
-#include "Log.h"
+#include "Tracer.h"
+#include "ClientDefs.h"
 
 Leader::Leader(void* server)
 {	
 	server_ = server;
-	Log::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") I am a LEADER\r\n");
+	Tracer::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") I am a LEADER\r\n");
 
 	have_to_die_		= false;	
 	term_is_not_timeout_= false;
@@ -16,14 +17,14 @@ Leader::~Leader()
 
 	cv_send_heart_beat_all_servers_.notify_all();
 
-	Log::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") Destroying...\r\n");
+	Tracer::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") Destroying...\r\n");
 	if (thread_send_heart_beat_all_servers_.joinable())
 		thread_send_heart_beat_all_servers_.join();
 
 	if (thread_check_leader_time_out_to_change_term_.joinable())
 		thread_check_leader_time_out_to_change_term_.join();
 
-	Log::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") Destroyed...\r\n");
+	Tracer::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") Destroyed...\r\n");
 }
 
 void Leader::start()
@@ -45,10 +46,10 @@ void Leader::check_leader_time_out_to_change_term()
 
 			count_term = count_term - (TIME_OUT_WAIT / 1000);
 
-			Log::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") Count term["+std::to_string(TIME_OUT_LEADER_TERM/1000)+"]:" + std::to_string(count_term) + " \r\n");
+			Tracer::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") Count term["+std::to_string(TIME_OUT_LEADER_TERM/1000)+"]:" + std::to_string(count_term) + " \r\n");
 
 			if ((abs(last_time_stamp_taken_miliseconds_.count() - current_time_stam_taken_miliseconds.count())) > TIME_OUT_LEADER_TERM) {
-				Log::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") TERM was finished\r\n");
+				Tracer::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") TERM was finished\r\n");
 				// Inform server that state has changed to follower.  
 				((Server*)server_)->set_new_state(StateEnum::follower_state);
 			}
@@ -92,12 +93,12 @@ void Leader::send_heart_beat_all_servers()
 						rpc.append_entry.argument_leader_commit_ = 0;											// Leader’s commitIndex
 
 						send(&rpc,
-							PORT_BASE + RECEIVER_PORT + count,
-							std::string(SERVER) + "(L)." + std::to_string(((Server*)server_)->get_server_id()),
-							std::string(HEART_BEAT) + std::string("(") + std::string(INVOKE) + std::string(")"),
-							std::string(SERVER) + "(ALL)." + std::to_string(count)
+							BASE_PORT + RECEIVER_PORT + count,
+							std::string(SERVER_TEXT) + "(L)." + std::to_string(((Server*)server_)->get_server_id()),
+							std::string(HEART_BEAT_TEXT) + std::string("(") + std::string(INVOKE_TEXT) + std::string(")"),
+							std::string(SERVER_TEXT) + "(ALL)." + std::to_string(count)
 						);
-						Log::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") Sent Heart-beat to Server." + std::to_string(count)+ "\r\n");
+						Tracer::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") Sent Heart-beat to Server." + std::to_string(count)+ "\r\n");
 					}
 				}
 			}
@@ -146,9 +147,9 @@ void Leader::dispatch_append_heart_beat(RPC* rpc)
 	}
 	else if (rpc->rpc_direction == RPCDirection::rpc_out_result) {
 		if(rpc->append_entry.result_success_ == (uint32_t)true)
-			Log::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") ACK heart beat Server\r\n");
+			Tracer::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") ACK heart beat Server\r\n");
 		else 
-			Log::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") FAILED!!! ACK heart beat Server\r\n");
+			Tracer::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") FAILED!!! ACK heart beat Server\r\n");
 	}
 }
 
@@ -160,12 +161,12 @@ void Leader::dispatch_client_request_leader(RPC* rpc)
 		rpc->client_request.client_result = true;
 		rpc->client_request.client_leader = ((Server*)server_)->get_server_id();	
 
-		//send(&rpc,
-		//	PORT_BASE + RECEIVER_PORT + count,
-		//	std::string(SERVER) + "(L)." + std::to_string(((Server*)server_)->get_server_id()),
-		//	std::string(HEART_BEAT) + std::string("(") + std::string(INVOKE) + std::string(")"),
-		//	std::string(SERVER) + "(ALL)." + std::to_string(count)
-		//);
+		send(rpc,
+			BASE_PORT + RECEIVER_PORT + rpc->client_request.client_id,
+			std::string(SERVER_TEXT) + "(L)." + std::to_string(((Server*)server_)->get_server_id()),
+			std::string(HEART_BEAT_TEXT) + std::string("(") + std::string(INVOKE_TEXT) + std::string(")"),
+			std::string(CLIENT_TEXT) + "(Unique)." + std::to_string(rpc->client_request.client_id)
+		);
 	}
 	else if (rpc->rpc_direction == RPCDirection::rpc_out_result) {
 		// N/A
@@ -176,12 +177,34 @@ void Leader::dispatch_client_request_leader(RPC* rpc)
 void Leader::dispatch_client_request_value(RPC* rpc)
 {
 	if (rpc->rpc_direction == RPCDirection::rpc_in_invoke) {
+
+		// TODO: write log. 
+		// write_log(rpc);
+
+		for (uint32_t num_server = 0; num_server < NUM_SERVERS; num_server++) {
+			RPC rpc; 
+			rpc.rpc_type = RPCTypeEnum::rpc_append_entry;
+			rpc.rpc_direction = RPCDirection::rpc_in_invoke;			
+			rpc.append_entry.argument_term_				= ((Server*)server_)->get_current_term();						// Leader's term
+			rpc.append_entry.argument_leader_id_		= ((Server*)server_)->get_server_id();							// So follower can redirect clients
+			//rpc.append_entry.argument_prev_log_index_	;																// Index of log entry immediately preceding	new ones
+			//rpc.append_entry.argument_prev_log_term_	;																// Term of argument_prev_log_index entry
+			//rpc.append_entry.argument_entries_			;																// Log entries to store(empty for heartbeat; may send more than one for efficiency)
+			//rpc.append_entry.argument_leader_commit_	;																// Leader’s commitIndex
+
+			send(&rpc,
+				BASE_PORT + RECEIVER_PORT + num_server,
+				std::string(SERVER_TEXT) + "(L)." + std::to_string(((Server*)server_)->get_server_id()),
+				std::string(APPEND_ENTRY_TEXT) + std::string("(") + std::string(INVOKE_TEXT) + std::string(")"),
+				std::string(SERVER_TEXT) + "(ALL)." + std::to_string(num_server)
+			);
+		}
 	}
 	else if (rpc->rpc_direction == RPCDirection::rpc_out_result) {
 		if (rpc->append_entry.result_success_ == (uint32_t)true)
-			Log::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") ACK heart beat Server\r\n");
+			Tracer::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") ACK heart beat Server\r\n");
 		else
-			Log::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") FAILED!!! ACK heart beat Server\r\n");
+			Tracer::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") FAILED!!! ACK heart beat Server\r\n");
 	}
 }
 
@@ -213,6 +236,9 @@ void Leader::dispatch(RPC* rpc)
 			dispatch_client_request_value(rpc);
 		}
 		else
-			Log::trace("Leader::dispatch - Wrong!!! type " + std::to_string(static_cast<int>(rpc->rpc_type)) + "\r\n");
+			Tracer::trace("Leader::dispatch - Wrong!!! type " + std::to_string(static_cast<int>(rpc->rpc_type)) + "\r\n");
 	}
 }
+
+
+

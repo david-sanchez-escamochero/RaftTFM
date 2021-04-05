@@ -22,12 +22,12 @@ int main(int argc, char** argv)
     else {
         // If it is a Client. 
         if ( std::stoi(argv[1]) > NUM_SERVERS ) {
-            Log::trace("*************************\r\n");
-            Log::trace("   Starting RaftClient\r\n");
-            Log::trace("************************\r\n");
+            Tracer::trace("*************************\r\n");
+            Tracer::trace("   Starting RaftClient\r\n");
+            Tracer::trace("************************\r\n");
             Client client;
             if (!client.start("C:\\Users\\ASUS_PORTATIL\\source\\repos\\RaftClient\\RaftClient\\names_starts_with_A.txt", std::stoi(argv[1])))
-                Log::trace("RaftClient - Failed to start. \r\n");
+                Tracer::trace("RaftClient - Failed to start. \r\n");
         }
         // If it is a Server. 
         else {
@@ -36,6 +36,7 @@ int main(int argc, char** argv)
         }
     }    
 }
+
 
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu

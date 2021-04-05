@@ -3,10 +3,10 @@
 #include <string>
 #include <mutex>
 
-class Log
+class Tracer
 {
 public:
-	Log();
+	Tracer();
 	static void trace(std::string str_log);
 	
 private:

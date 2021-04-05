@@ -6,7 +6,7 @@ enum class StateEnum { follower_state, leader_state, candidate_state, unknown_st
 
 #define NUM_SERVERS												2
 #define MAX_LOG_ENTRIES											50
-#define PORT_BASE												6000
+#define BASE_PORT												6000
 #define SENDER_PORT												100
 #define RECEIVER_PORT											200
 #define MAJORITY												2//( ( NUM_SERVERS % 2 ) + 1 ) - 1  // -1 Because I do not send message to myself.
@@ -20,16 +20,16 @@ enum class StateEnum { follower_state, leader_state, candidate_state, unknown_st
 #define TIME_OUT_WAIT											2000//(ms)
 
 
-#define FOLLOWER												"FOLLOWER"
-#define	LEADER													"LEADER"
-#define CANDIDATE												"CANDIDATE"
-#define SERVER													"SERVER"
-#define UNKNOWN													"UNKNOWN"
+#define FOLLOWER_TEXT											"FOLLOWER"
+#define	LEADER_TEXT												"LEADER"
+#define CANDIDATE_TEXT											"CANDIDATE"
+#define SERVER_TEXT												"SERVER"
+#define UNKNOWN_TEXT											"UNKNOWN"
 
-#define REQUEST_VOTE											"REQUEST_VOTE"
-#define APPEND_ENTRY											"APPEND_ENTRY"
-#define HEART_BEAT												"HEART_BEAT"
-#define INVOKE													"INVOKE"
-#define RESULT													"RESULT"
+#define REQUEST_VOTE_TEXT										"REQUEST_VOTE"
+#define APPEND_ENTRY_TEXT										"APPEND_ENTRY"
+#define HEART_BEAT_TEXT											"HEART_BEAT"
+#define INVOKE_TEXT												"INVOKE"
+#define RESULT_TEXT												"RESULT"
 
 

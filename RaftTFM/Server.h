@@ -35,6 +35,13 @@ public:
 	void		set_voted_for(int32_t vote_for);
 
 protected:
+
+	StateEnum	current_state_;
+	StateEnum	new_state_;
+	std::thread thread_server_dispatch_;
+	std::thread thread_check_new_state_;
+
+
 	// Persisten state on all servers. 
 	uint32_t	current_term_;			// Latest term server has seen (initialized to 0 on first boot, increases monotonically)
 	int32_t		voted_for_;				// CandidateId that received vote in current term(or null if none)
@@ -43,13 +50,8 @@ protected:
 	// Volatile state on all servers. 
 	uint32_t	commit_index_;			// Index of highest log entry known to be committed(initialized to 0, increases	monotonically)
 	uint32_t	last_applied_;			// Index of highest log entry applied to state	machine(initialized to 0, increases	monotonically)
-	StateEnum	current_state_; 
-	StateEnum	new_state_;
-	std::thread thread_server_dispatch_;
-	std::thread thread_check_new_state_;
-
-
-
+	
+	
 private: 
 	
 	IConnector*		connector_;

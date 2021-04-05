@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "Log.h"
+#include "Tracer.h"
 #include <thread>
 #include "Semaphore.h"
 #include "Communication.h"

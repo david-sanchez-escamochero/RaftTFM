@@ -1,6 +1,6 @@
 #include "Server.h"
 #include <string>
-#include "Log.h"
+#include "Tracer.h"
 #include <string>
 #include "RaftUtils.h"
 
@@ -28,7 +28,7 @@ Server::Server(uint32_t server_id)
 
 
 		
-	Log::trace("Started server ID:" + std::to_string(server_id_) + "\r\n");
+	Tracer::trace("Started server ID:" + std::to_string(server_id_) + "\r\n");
 }
 
 Server::~Server()
@@ -95,10 +95,10 @@ void* Server::receive()
 {
 	while (!have_to_die_) {
 		RPC rpc;		
-		int error = communication_.receiveMessage( &rpc, PORT_BASE + RECEIVER_PORT + server_id_, std::string( SERVER ) + std::string( "." ) + std::to_string( get_server_id() ) );
+		int error = communication_.receiveMessage( &rpc, BASE_PORT + RECEIVER_PORT + server_id_, std::string( SERVER_TEXT ) + std::string( "." ) + std::to_string( get_server_id() ) );
 
 		if (error) {
-			Log::trace("Follower::receive - FAILED!!!  - error" + std::to_string(error) + "\r\n");
+			Tracer::trace("Follower::receive - FAILED!!!  - error" + std::to_string(error) + "\r\n");
 		}
 		else {
 			queue_.push(rpc);
@@ -117,19 +117,19 @@ IConnector* Server::get_current_shape_sever(StateEnum state)
 	IConnector* connector; 
 	if (state == StateEnum::follower_state) {
 		connector = new Follower(this);		
-		Log::trace("Created Follower." + std::to_string(get_server_id()) + "\r\n");
+		Tracer::trace("Created Follower." + std::to_string(get_server_id()) + "\r\n");
 	}
 	else if (state == StateEnum::candidate_state) {
 		connector = new Candidate(this);
-		Log::trace("Created Candidate." + std::to_string(get_server_id()) + "\r\n");
+		Tracer::trace("Created Candidate." + std::to_string(get_server_id()) + "\r\n");
 	}
 	else if (state == StateEnum::leader_state) {
 		connector = new Leader(this);	
-		Log::trace("Created Leader." + std::to_string( get_server_id() ) +"\r\n");
+		Tracer::trace("Created Leader." + std::to_string( get_server_id() ) +"\r\n");
 	}
 	else {
 		std::string color_name{ "GREEN" };
-		Log::trace("Server::get_current_shape_sever -  FAILED!!! Unknow state:" + std::to_string(static_cast<int>(state)) + "%d\r\n");
+		Tracer::trace("Server::get_current_shape_sever -  FAILED!!! Unknow state:" + std::to_string(static_cast<int>(state)) + "%d\r\n");
 		connector = NULL;
 	}
 
@@ -151,7 +151,7 @@ void Server::check_new_state()
 				//std::lock_guard<std::mutex> locker_new_state(mu_new_state_);
 				std::lock_guard<std::mutex> locker(mu_server_);
 				if (current_state_ != new_state_) {
-					Log::trace("Server(" + std::to_string(server_id_) + ") State changes from " + parse_state_to_string(current_state_) + " to " + parse_state_to_string(new_state_) + "\r\n");
+					Tracer::trace("Server(" + std::to_string(server_id_) + ") State changes from " + parse_state_to_string(current_state_) + " to " + parse_state_to_string(new_state_) + "\r\n");
 					current_state_ = new_state_;
 					connector_ = get_current_shape_sever(current_state_);
 
@@ -167,7 +167,7 @@ void Server::set_new_state(StateEnum state)
 {			
 	{
 		//std::lock_guard<std::mutex> locker_new_state(mu_new_state_);
-		Log::trace("Server(" + std::to_string(server_id_) + ") New state has been requested\r\n");
+		Tracer::trace("Server(" + std::to_string(server_id_) + ") New state has been requested\r\n");
 		new_state_ = state;
 		semaphore_new_state_.notify(SEMAPHORE_SERVER_NEW_STATE);
 	}
@@ -176,7 +176,7 @@ void Server::set_new_state(StateEnum state)
 void Server::increment_current_term()
 {	
 	current_term_++;
-	Log::trace("Server(" + std::to_string(server_id_) + ") Increment term from " + std::to_string(current_term_ - 1) + " to " + std::to_string(current_term_) + "\r\n");	
+	Tracer::trace("Server(" + std::to_string(server_id_) + ") Increment term from " + std::to_string(current_term_ - 1) + " to " + std::to_string(current_term_) + "\r\n");
 }
 
 uint32_t Server::get_current_term()

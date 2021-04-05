@@ -17,3 +17,11 @@ uint32_t Command::get_term_when_entry_was_received_by_leader()
 {
 	return uint32_t();
 }
+
+//void Command::set_log_index(uint32_t log_index)
+//{
+//}
+//
+//void Command::get_log_index()
+//{
+//}
