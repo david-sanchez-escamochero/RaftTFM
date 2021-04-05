@@ -149,18 +149,8 @@ int Communication::receiveMessage(RPC* rpc, unsigned short port, std::string rec
     RPC* rpc_aux = reinterpret_cast<RPC*>(RecvBuff);
     *rpc = *rpc_aux;
 
-    std::string str_aux;
-    if (rpc->rpc_type == RPCTypeEnum::rpc_append_entry) {
-        str_aux = "APPEND_ENTRY";           
-    }
-    else if (rpc->rpc_type == RPCTypeEnum::rpc_append_request_vote) {
-        str_aux = "REQUEST_VOTE";
-    }
-    else if (rpc->rpc_type == RPCTypeEnum::rpc_append_heart_beat) {
-        str_aux = "HEART_BEAT";
-    }
-    
-    str_trace = "[>>>>> Received [" + str_aux + "] to (" + receiver + "(" + std::to_string(port) + ")) - from (" + std::string(SERVER_TEXT) + "." + std::to_string(rpc->server_id_origin) + ")   - OK] \r\n";
+        
+    str_trace = "[>>>>> Received [" + parse_from_enum_to_text(rpc->rpc_type) + "] to (" + receiver + "(" + std::to_string(port) + ")) - from (" + std::string(SERVER_TEXT) + "." + std::to_string(rpc->server_id_origin) + ")   - OK] \r\n";
     Tracer::trace(str_trace);
     // Cerramos el socket de la comunicacion
     closesocket(comm_socket);

@@ -6,6 +6,32 @@ enum class RPCDirection { rpc_in_invoke, rpc_out_result};
 #include "AppendEntry.h"
 #include "RequestVote.h"
 #include "ClientRequest.h"
+#include "ClientDefs.h"
+
+
+std::string parse_from_enum_to_text(RPCTypeEnum type) {
+	std::string ret; 
+	switch (type) {
+		case RPCTypeEnum::rpc_append_entry:
+			ret = APPEND_ENTRY_TEXT;
+			break;		
+		case RPCTypeEnum::rpc_append_request_vote: 
+			ret = REQUEST_VOTE_TEXT;
+			break;
+		case RPCTypeEnum::rpc_append_heart_beat:
+			ret = HEART_BEAT_TEXT;
+			break;
+		case RPCTypeEnum::rpc_client_request_value:
+			ret = CLIENT_REQUEST_VALUE_TEXT;
+			break;
+		case RPCTypeEnum::rpc_client_request_leader:
+			ret = CLIENT_REQUEST_LEADER_TEXT;
+			break;
+		default: 
+			ret = UNKNOWN_TEXT;
+	}
+	return ret; 
+}
 
 
 class RPC

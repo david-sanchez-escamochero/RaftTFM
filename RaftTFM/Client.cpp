@@ -46,6 +46,8 @@ void Client::find_a_leader() {
         send_request_to_find_a_leader(num_server++);
         {
             // Time waiting servers replay saying who is the leader...
+            Tracer::trace("Client - Leader does not respond, error: " + std::to_string(ret) + "\r\n");
+            Tracer::trace("Client - Waiting " + std::to_string(TIME_WAITING_A_LEADER) + "(ms) to retry...\r\n");
             std::mutex mtx;
             std::unique_lock<std::mutex> lck(mtx);
             cv_found_a_leader_.wait_for(lck, std::chrono::milliseconds(TIME_WAITING_A_LEADER));
@@ -54,7 +56,7 @@ void Client::find_a_leader() {
         if (num_server == NUM_SERVERS)
             num_server = 0;
 
-    } while (leader_ != NO_LEADER_FOUND);    
+    } while (leader_ == NO_LEADER_FOUND);    
 }
 
 void* Client::receive()
