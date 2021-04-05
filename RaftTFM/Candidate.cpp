@@ -157,10 +157,10 @@ void Candidate::dispatch_request_vote(RPC* rpc)
 			rpc->server_id_target = rpc->append_entry.argument_leader_id_;
 
 			send(rpc,
-				BASE_PORT + RECEIVER_PORT + rpc->append_entry.argument_leader_id_,
+				BASE_PORT + RECEIVER_PORT + rpc->request_vote.argument_candidate_id_,
 				std::string(SERVER_TEXT) + "(C)." + std::to_string(((Server*)server_)->get_server_id()),
 				std::string(REQUEST_VOTE_TEXT) + std::string("(") + std::string(RESULT_TEXT) + std::string(")"),
-				std::string(SERVER_TEXT) + "(C)." + std::to_string(rpc->append_entry.argument_leader_id_)
+				std::string(SERVER_TEXT) + "(C)." + std::to_string(rpc->request_vote.argument_candidate_id_)
 			);
 
 			// Inform server that state has changed to follower.  
@@ -172,14 +172,14 @@ void Candidate::dispatch_request_vote(RPC* rpc)
 			rpc->rpc_direction = RPCDirection::rpc_out_result;
 			rpc->request_vote.result_vote_granted_ = false;
 			rpc->server_id_origin = ((Server*)server_)->get_server_id();
-			rpc->server_id_target = rpc->append_entry.argument_leader_id_;
+			rpc->server_id_target = rpc->request_vote.argument_candidate_id_;
 
 
 			send(rpc,
-				BASE_PORT + RECEIVER_PORT + rpc->append_entry.argument_leader_id_,
+				BASE_PORT + RECEIVER_PORT + rpc->request_vote.argument_candidate_id_,
 				std::string(SERVER_TEXT) + "(C)." + std::to_string(((Server*)server_)->get_server_id()),
 				std::string(REQUEST_VOTE_TEXT) + std::string("(") + std::string(RESULT_TEXT) + std::string(")"),
-				std::string(SERVER_TEXT) + "(C)." + std::to_string(rpc->append_entry.argument_leader_id_)
+				std::string(SERVER_TEXT) + "(C)." + std::to_string(rpc->request_vote.argument_candidate_id_)
 			);
 		}
 
@@ -194,7 +194,7 @@ void Candidate::dispatch_request_vote(RPC* rpc)
 				Tracer::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") I have received just mayority of request vote: " + std::to_string(received_votes_) + "\r\n");
 				((Server*)server_)->set_new_state(StateEnum::leader_state);
 				there_is_leader_ = true;
-			}
+			}			
 		}
 		// If I was rejected. 
 		else {

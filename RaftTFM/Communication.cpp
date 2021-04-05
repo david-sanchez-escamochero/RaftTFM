@@ -118,14 +118,14 @@ int Communication::receiveMessage(RPC* rpc, unsigned short port, std::string rec
     // Asociamos ip y puerto al socket
     resp = bind(conn_socket, (struct sockaddr*) & server, sizeof(server));
     if (resp == SOCKET_ERROR) {
-        str_trace = "[>>>>> Received(" + receiver + "(" + std::to_string(port) + ")) - FAILED] (Failed to connect server)\r\n";
+        str_trace = "[>>>>> Received(" + receiver + "(" + std::to_string(port) + ")) - FAILED] (Failed to bind server)\r\n";
         Tracer::trace(str_trace);
         closesocket(conn_socket); WSACleanup();
         return MSG_ERROR_TO_ASSOCIATE_PORT_AND_IP_SOCKET;
     }
 
     if (listen(conn_socket, 1) == SOCKET_ERROR) {
-        str_trace = "[>>>>> Received(" + receiver + "(" + std::to_string(port) + ")) - FAILED] (Failed to connect server)\r\n";
+        str_trace = "[>>>>> Received(" + receiver + "(" + std::to_string(port) + ")) - FAILED] (Failed to listen server)\r\n";
         Tracer::trace(str_trace);
         closesocket(conn_socket); WSACleanup();
         return MSG_ERROR_TO_ENABLE_INGOING_CONNECTIONS;
