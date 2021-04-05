@@ -155,7 +155,7 @@
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="Follower.cpp" />
     <ClCompile Include="Leader.cpp" />
-    <ClCompile Include="ManageLog.cpp" />
+    <ClCompile Include="ManagerLog.cpp" />
     <ClCompile Include="Tracer.cpp" />
     <ClCompile Include="Communication.cpp" />
     <ClCompile Include="RaftTFM.cpp" />
@@ -173,7 +173,7 @@
     <ClInclude Include="Follower.h" />
     <ClInclude Include="IConnector.h" />
     <ClInclude Include="Leader.h" />
-    <ClInclude Include="ManageLog.h" />
+    <ClInclude Include="ManagerLog.h" />
     <ClInclude Include="Tracer.h" />
     <ClInclude Include="Communication.h" />
     <ClInclude Include="RaftDefs.h" />
