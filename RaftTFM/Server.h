@@ -14,6 +14,12 @@
 
 #define NONE	-1
 
+
+typedef struct {
+	uint32_t log_index_;
+	Command	 log_[MAX_LOG_ENTRIES];
+}Log;
+
 class Server
 {
 
@@ -46,7 +52,7 @@ protected:
 	// Persisten state on all servers. 
 	uint32_t	current_term_;			// Latest term server has seen (initialized to 0 on first boot, increases monotonically)
 	int32_t		voted_for_;				// CandidateId that received vote in current term(or null if none)
-	Command		log_[MAX_LOG_ENTRIES];	// Log entries; each entry contains command for state machine, and term when entry was received by leader(first index is 1)
+	Log			log_;					// Log entries; each entry contains command for state machine, and term when entry was received by leader(first index is 1)
 
 	// Volatile state on all servers. 
 	uint32_t	commit_index_;			// Index of highest log entry known to be committed(initialized to 0, increases	monotonically)

@@ -16,7 +16,7 @@ Server::Server(uint32_t server_id)
 	// Persisten state on all servers. 
 	current_term_			= 0;							// Latest term server has seen (initialized to 0 on first boot, increases monotonically)
 	voted_for_				= NONE;							// CandidateId that received vote in current term(or null if none)
-	memset(log_, 0, sizeof(log_));							// Log entries; each entry contains command for state machine, and term when entry was received by leader(first index is 1)
+	memset(&log_, 0, sizeof(log_));							// Log entries; each entry contains command for state machine, and term when entry was received by leader(first index is 1)
 
 	// Volatile state on all servers. 
 	commit_index_			= 0;							// Index of highest log entry known to be committed(initialized to 0, increases	monotonically)
@@ -54,16 +54,12 @@ void Server::send(RPC* rpc, unsigned short port, std::string sender, std::string
 
 void Server::start() 
 {		
-	log_[0].set_state_machime_command(69);
-	log_[0].set_term_when_entry_was_received_by_leader(1000);
-
-	uint32_t ret = manager_log_.read_log(file_log_name_, log_, sizeof(log_));
+	uint32_t ret = manager_log_.read_log(file_log_name_, &log_, sizeof(log_));
 	if (ret != MANAGER_NO_ERROR) {
 		Tracer::trace("Server::start - FAILED!!! to read " + file_log_name_ +" log, stopping server...\r\n");
 		return;
 	}
 	
-
 	// TEST.
 	//std::this_thread::sleep_for(std::chrono::milliseconds(30000));
 
