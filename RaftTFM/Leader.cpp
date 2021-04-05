@@ -81,16 +81,13 @@ void Leader::send_heart_beat_all_servers()
 						rpc.server_id_target = count;
 						rpc.rpc_type = RPCTypeEnum::rpc_append_heart_beat;
 						rpc.rpc_direction = RPCDirection::rpc_in_invoke;
-						rpc.append_entry.argument_term_  = ((Server*)server_)->get_current_term();				// Leader's term
-						rpc.append_entry.argument_leader_id_ =  ((Server*)server_)->get_server_id();			// Leader's id
-						// TODO: Hacer
-						rpc.append_entry.argument_prev_log_index_ = 0;											// Index of log entry immediately preceding	new ones
-						// TODO: Hacer
-						rpc.append_entry.argument_prev_log_term_ = 0;											// Term of candidate's last log entry (§5.4)
-						// TODO: Hacer
-						rpc.append_entry.argument_entries_[0] = 0;												// Log entries to store(empty for heartbeat; may send more than one for efficiency)
-						// TODO: Hacer 
-						rpc.append_entry.argument_leader_commit_ = 0;											// Leader’s commitIndex
+						rpc.append_entry.argument_term_ = ((Server*)server_)->get_current_term();															// Leader's term
+						rpc.append_entry.argument_leader_id_ = ((Server*)server_)->get_server_id();															// So follower can redirect clients
+						rpc.append_entry.argument_prev_log_index_ = ((Server*)server_)->get_log_index() - 1;												// Index of log entry immediately preceding	new ones
+						rpc.append_entry.argument_prev_log_term_ = ((Server*)server_)->get_term_of_entry_in_log(((Server*)server_)->get_log_index() - 1);	// Term of argument_prev_log_index entry
+						rpc.append_entry.argument_entries_[0] = "";																							// Log entries to store(empty for heartbeat; may send more than one for efficiency)
+						rpc.append_entry.argument_leader_commit_ = ((Server*)server_)->get_commit_index();													// Leader’s commitIndex
+
 
 						send(&rpc,
 							BASE_PORT + RECEIVER_PORT + count,
@@ -178,33 +175,35 @@ void Leader::dispatch_client_request_value(RPC* rpc)
 {
 	if (rpc->rpc_direction == RPCDirection::rpc_in_invoke) {
 
-		// TODO: write log. 
-		// write_log(rpc);
+		// Write to log. 
+		std::string client_value = rpc->client_request.client_value;
+		uint32_t ret = ((Server*)server_)->write_log(client_value);
+		if (ret == MANAGER_NO_ERROR) {
+			for (uint32_t num_server = 0; num_server < NUM_SERVERS; num_server++) {
+				RPC rpc;
+				rpc.rpc_type = RPCTypeEnum::rpc_append_entry;
+				rpc.rpc_direction = RPCDirection::rpc_in_invoke;
+				rpc.append_entry.argument_term_				= ((Server*)server_)->get_current_term();													// Leader's term
+				rpc.append_entry.argument_leader_id_		= ((Server*)server_)->get_server_id();														// So follower can redirect clients
+				rpc.append_entry.argument_prev_log_index_	= ((Server*)server_)->get_log_index() - 1;													// Index of log entry immediately preceding	new ones
+				rpc.append_entry.argument_prev_log_term_	= ((Server*)server_)->get_term_of_entry_in_log(((Server*)server_)->get_log_index() - 1);	// Term of argument_prev_log_index entry
+				rpc.append_entry.argument_entries_[0]		= client_value;																				// Log entries to store(empty for heartbeat; may send more than one for efficiency)
+				rpc.append_entry.argument_leader_commit_	= ((Server*)server_)->get_commit_index();													// Leader’s commitIndex
 
-		for (uint32_t num_server = 0; num_server < NUM_SERVERS; num_server++) {
-			RPC rpc; 
-			rpc.rpc_type = RPCTypeEnum::rpc_append_entry;
-			rpc.rpc_direction = RPCDirection::rpc_in_invoke;			
-			rpc.append_entry.argument_term_				= ((Server*)server_)->get_current_term();						// Leader's term
-			rpc.append_entry.argument_leader_id_		= ((Server*)server_)->get_server_id();							// So follower can redirect clients
-			//rpc.append_entry.argument_prev_log_index_	;																// Index of log entry immediately preceding	new ones
-			//rpc.append_entry.argument_prev_log_term_	;																// Term of argument_prev_log_index entry
-			//rpc.append_entry.argument_entries_			;																// Log entries to store(empty for heartbeat; may send more than one for efficiency)
-			//rpc.append_entry.argument_leader_commit_	;																// Leader’s commitIndex
-
-			send(&rpc,
-				BASE_PORT + RECEIVER_PORT + num_server,
-				std::string(SERVER_TEXT) + "(L)." + std::to_string(((Server*)server_)->get_server_id()),
-				std::string(APPEND_ENTRY_TEXT) + std::string("(") + std::string(INVOKE_TEXT) + std::string(")"),
-				std::string(SERVER_TEXT) + "(ALL)." + std::to_string(num_server)
-			);
+				send(&rpc,
+					BASE_PORT + RECEIVER_PORT + num_server,
+					std::string(SERVER_TEXT) + "(L)." + std::to_string(((Server*)server_)->get_server_id()),
+					std::string(APPEND_ENTRY_TEXT) + std::string("(") + std::string(INVOKE_TEXT) + std::string(")"),
+					std::string(SERVER_TEXT) + "(ALL)." + std::to_string(num_server)
+				);
+			}
+		}
+		else {
+			Tracer::trace("Leader::dispatch_client_request_value - FAILED to write log, error " + std::to_string(ret) + "\r\n");
 		}
 	}
 	else if (rpc->rpc_direction == RPCDirection::rpc_out_result) {
-		if (rpc->append_entry.result_success_ == (uint32_t)true)
-			Tracer::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") ACK heart beat Server\r\n");
-		else
-			Tracer::trace("(Leader." + std::to_string(((Server*)server_)->get_server_id()) + ") FAILED!!! ACK heart beat Server\r\n");
+		// N/A
 	}
 }
 

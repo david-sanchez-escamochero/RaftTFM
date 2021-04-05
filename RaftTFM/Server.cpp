@@ -72,7 +72,7 @@ void Server::start()
 
 
 	// Start new Rol(Follower at the beginning)
-	set_new_state(StateEnum::follower_state);							
+	set_new_state(StateEnum::leader_state);							
 
 
 	receive();
@@ -217,3 +217,29 @@ void Server::set_voted_for(int32_t vote_for)
 	voted_for_ = vote_for;
 }
 
+uint32_t  Server::write_log(std::string state_machine_command)
+{
+	// Increment log index; 
+	log_.log_index_++;
+	// Update term for the entry.
+	log_.log_[log_.log_index_].set_term_when_entry_was_received_by_leader(current_term_);
+	// Update state machine command. 
+	log_.log_[log_.log_index_].set_state_machime_command(state_machine_command);
+	// Wirte log. 
+	uint32_t ret = manager_log_.write_log(file_log_name_, &log_, sizeof(log_));
+
+	if (ret) {
+		Tracer::trace("Server::write_log - FAILED!!! to write in log, error: " + std::to_string(ret) + "\r\n");
+	}
+	return ret;
+}
+
+uint32_t Server::get_log_index()
+{
+	return log_.log_index_;
+}
+
+uint32_t Server::get_term_of_entry_in_log(uint32_t log_index)
+{
+	return log_.log_[log_index].get_term_when_entry_was_received_by_leader();
+}

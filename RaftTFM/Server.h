@@ -34,12 +34,23 @@ public:
 	void		set_new_state(StateEnum state);
 	std::mutex	mu_server_;
 	void		increment_current_term();
+
+	// Get/set current term. 
 	uint32_t	get_current_term();
 	void		set_current_term(uint32_t term);
+
 	uint32_t	get_commit_index();
 	uint32_t	get_last_applied();
-	int32_t		get_voted_for();
+
+	// Get/set vote for. 
+	int32_t		get_voted_for();	 
 	void		set_voted_for(int32_t vote_for);
+
+	// Manager logs. 
+	uint32_t	write_log(std::string state_machine_command);
+	uint32_t	get_log_index();
+	uint32_t	get_term_of_entry_in_log(uint32_t log_index);
+
 
 protected:
 
