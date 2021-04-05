@@ -6,6 +6,9 @@ enum class RPCDirection { rpc_in_invoke, rpc_out_result};
 #include "AppendEntry.h"
 #include "RequestVote.h"
 #include "ClientRequest.h"
+#include "ClientDefs.h"
+
+
 
 
 class RPC
@@ -24,5 +27,7 @@ public:
 		ClientRequest client_request;
 	//};
 
+	std::string parse_from_enum_to_text(RPCTypeEnum type);
 };
+
 

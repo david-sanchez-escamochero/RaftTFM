@@ -46,6 +46,8 @@ void Client::find_a_leader() {
         send_request_to_find_a_leader(num_server++);
         {
             // Time waiting servers replay saying who is the leader...
+            Tracer::trace("Client - Leader does not respond, error: " + std::to_string(ret) + "\r\n");
+            Tracer::trace("Client - Waiting " + std::to_string(TIME_WAITING_A_LEADER) + "(ms) to retry...\r\n");
             std::mutex mtx;
             std::unique_lock<std::mutex> lck(mtx);
             cv_found_a_leader_.wait_for(lck, std::chrono::milliseconds(TIME_WAITING_A_LEADER));
@@ -54,7 +56,7 @@ void Client::find_a_leader() {
         if (num_server == NUM_SERVERS)
             num_server = 0;
 
-    } while (leader_ != NO_LEADER_FOUND);    
+    } while (leader_ == NO_LEADER_FOUND);    
 }
 
 void* Client::receive()
@@ -73,14 +75,14 @@ void* Client::receive()
                 (rpc.client_request.client_result == (uint32_t)true)                
                 ) {
                 leader_ = rpc.client_request.client_leader;
-                semaphore_wait_reveive_leader_.notify(SEMAPHORE_RECEIVE_LEADER);
+                cv_found_a_leader_.notify_one();
             } 
             else if (
                 (rpc.rpc_direction == RPCDirection::rpc_out_result) &&
                 (rpc.rpc_type == RPCTypeEnum::rpc_client_request_value) &&
                 (rpc.client_request.client_result == (uint32_t)true)
                 ) {                
-                semaphore_wait_commit_value_.notify(SEMAPHORE_RECEIVE_LEADER);
+                cv_committed_value_.notify_one();
             }
         }
     }
@@ -97,7 +99,7 @@ void Client::send_request_to_find_a_leader(uint32_t num_server) {
     int ret = NO_LEADER_FOUND;
     
     
-    ret = communication_.sendMessage(&rpc, BASE_PORT + RECEIVER_PORT + num_server, CLIENT_TEXT, CLIENT_REQUEST_TEXT, LEADER_TEXT);
+    ret = communication_.sendMessage(&rpc, BASE_PORT + RECEIVER_PORT + num_server, CLIENT_TEXT, CLIENT_REQUEST_LEADER_TEXT, LEADER_TEXT);
     if (ret) {
         Tracer::trace("Client - Failed to request leader from server " + std::to_string(num_server) + ", error " + std::to_string(ret) + "\r\n");
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -111,7 +113,7 @@ bool Client::send_request(std::string file_name, uint32_t leader_id)
                         
         std::string value;
 
-        std::ifstream infile(".\\" + file_name_ + ".txt");
+        std::ifstream infile(file_name_);
 
         while (std::getline(infile, value))
         {
@@ -130,17 +132,20 @@ bool Client::send_request(std::string file_name, uint32_t leader_id)
                 int ret = 0;
                 do
                 {
-                    int ret = communication_.sendMessage(&rpc, BASE_PORT + RECEIVER_PORT + leader_id, CLIENT_TEXT, CLIENT_REQUEST_TEXT, LEADER_TEXT);
+                    int ret = communication_.sendMessage(&rpc, BASE_PORT + RECEIVER_PORT + leader_id, CLIENT_TEXT, CLIENT_REQUEST_LEADER_TEXT, LEADER_TEXT);
                     if (ret) {
                         Tracer::trace("Client - Leader does not respond, error: " + std::to_string(ret) + "\r\n");
                     }
+
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
                 } while (ret);
                 {
 
                     // Time waiting servers replay saying who is the leader...
                     std::mutex mtx;
                     std::unique_lock<std::mutex> lck(mtx);
-                    time_out = cv_commit_value_.wait_for(lck, std::chrono::milliseconds(TIME_WAITING_COMMIT_VALUE));
+                    time_out = cv_committed_value_.wait_for(lck, std::chrono::milliseconds(TIME_WAITING_COMMIT_VALUE));
                 }
                 if (time_out == std::cv_status::timeout) {
                     find_a_leader();
