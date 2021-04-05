@@ -26,7 +26,7 @@ private:
 	Semaphore				semaphore_wait_commit_value_;
 	void					find_a_leader();
 	std::condition_variable cv_found_a_leader_;
-	std::condition_variable cv_commit_value_;
+	std::condition_variable cv_committed_value_;
 	uint32_t				client_id_;
 };
 
