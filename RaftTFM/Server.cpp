@@ -6,6 +6,7 @@
 
 
 
+
 #define SEMAPHORE_SERVER_DISPATCH		1
 #define SEMAPHORE_SERVER_NEW_STATE		2	
 
@@ -25,7 +26,7 @@ Server::Server(uint32_t server_id)
 	
 	server_id_				= server_id;
 	have_to_die_			= false;
-
+	file_log_name_			= ".\\..\\Debug\\" + std::string(SERVER_TEXT) + std::to_string(server_id_) + std::string(".txt");
 
 		
 	Tracer::trace("Started server ID:" + std::to_string(server_id_) + "\r\n");
@@ -52,7 +53,17 @@ void Server::send(RPC* rpc, unsigned short port, std::string sender, std::string
 }
 
 void Server::start() 
-{	
+{		
+	log_[0].set_state_machime_command(69);
+	log_[0].set_term_when_entry_was_received_by_leader(1000);
+
+	uint32_t ret = manager_log_.read_log(file_log_name_, log_, sizeof(log_));
+	if (ret != MANAGER_NO_ERROR) {
+		Tracer::trace("Server::start - FAILED!!! to read " + file_log_name_ +" log, stopping server...\r\n");
+		return;
+	}
+	
+
 	// TEST.
 	//std::this_thread::sleep_for(std::chrono::milliseconds(30000));
 

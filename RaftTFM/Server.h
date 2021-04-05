@@ -9,6 +9,7 @@
 #include "IConnector.h"
 #include "Semaphore.h"
 #include <queue>
+#include "ManagerLog.h"
 
 
 #define NONE	-1
@@ -64,6 +65,7 @@ private:
 	queue<RPC>		queue_;
 	void			check_new_state();
 	std::mutex		mu_new_state_;
-	
+	ManagerLog		manager_log_;
+	std::string		file_log_name_;
 };
 

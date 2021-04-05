@@ -8,6 +8,12 @@
 
 using namespace std;
 
+#define MANAGER_NO_ERROR                0
+#define MANAGER_ERROR_TO_OPEN_FILE      1
+#define MANAGER_ERROR_NOT_OPENED_FILE   2
+#define MANAGER_ERROR_NOT_READ_LOG      3
+#define MANAGER_ERROR_NOT_WRITE_LOG     4
+
 
 class ManagerLog
 {
