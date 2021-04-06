@@ -28,10 +28,15 @@ protected:
 
 
 	std::thread thread_send_request_vote_to_all_servers_;
+
+	// Dispatchers.
 	void dispatch(RPC *rpc);
 	void dispatch_append_entry(RPC* rpc);
 	void dispatch_request_vote(RPC* rpc);
 	void dispatch_append_heart_beat(RPC* rpc);
+	void dispatch_client_request_leader(RPC* rpc);
+	void dispatch_client_request_value(RPC* rpc);
+
 
 
 	std::condition_variable cv_send_request_vote_to_all_servers_;

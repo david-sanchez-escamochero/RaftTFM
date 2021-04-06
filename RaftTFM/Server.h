@@ -51,6 +51,11 @@ public:
 	uint32_t	get_log_index();
 	uint32_t	get_term_of_entry_in_log(uint32_t log_index);
 
+	// Leader 
+	uint32_t	current_leader_id_;
+	uint32_t	get_current_leader_id();
+	void		set_current_leader_id(uint32_t leader_id);
+
 
 protected:
 

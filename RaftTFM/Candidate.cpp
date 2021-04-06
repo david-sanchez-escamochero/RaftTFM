@@ -203,11 +203,39 @@ void Candidate::dispatch_request_vote(RPC* rpc)
 	}
 }
 
+
+void Candidate::dispatch_client_request_leader(RPC* rpc)
+{
+	if (rpc->rpc_direction == RPCDirection::rpc_in_invoke) {
+		// N/A
+	}
+	else if (rpc->rpc_direction == RPCDirection::rpc_out_result) {
+		// N/A
+	}
+}
+
+
+void Candidate::dispatch_client_request_value(RPC* rpc)
+{
+	if (rpc->rpc_direction == RPCDirection::rpc_in_invoke) {
+		// N/A
+	}
+	else if (rpc->rpc_direction == RPCDirection::rpc_out_result) {
+		// N/A
+	}
+}
+
+
 void Candidate::dispatch_append_heart_beat(RPC* rpc) 
 {
-	Tracer::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") received heart_beat\r\n");
+	Tracer::trace("(Candidate." + std::to_string(((Server*)server_)->get_server_id()) + ") received heart_beat from another Leader...\r\n");
+
+	// save current leader's id.
+	((Server*)server_)->set_current_leader_id(rpc->append_entry.argument_leader_id_);
+
 	((Server*)server_)->set_new_state(StateEnum::follower_state);
 	there_is_leader_ = true;
+
 }
 
 void Candidate::receive(RPC* rpc)
@@ -233,6 +261,14 @@ void Candidate::dispatch(RPC* rpc)
 		// Another server establishes itself as a leader. 
 		else if (rpc->rpc_type == RPCTypeEnum::rpc_append_heart_beat) {
 			dispatch_append_heart_beat(rpc);
+		}
+		// A client request a leader
+		else if (rpc->rpc_type == RPCTypeEnum::rpc_client_request_leader) {
+			dispatch_client_request_leader(rpc);
+		}
+		// A client request value
+		else if (rpc->rpc_type == RPCTypeEnum::rpc_client_request_value) {
+			dispatch_client_request_value(rpc);
 		}
 		else
 			Tracer::trace("Candidate::dispatch - Wrong!!! type " + std::to_string(static_cast<int>(rpc->rpc_type)) + "\r\n");

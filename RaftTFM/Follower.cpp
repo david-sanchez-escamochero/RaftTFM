@@ -72,6 +72,16 @@ void Follower::receive(RPC* rpc)
 void Follower::dispatch_append_entry(RPC* rpc) 
 {
 	if (rpc->rpc_direction == RPCDirection::rpc_in_invoke) {
+		if (
+			( rpc->append_entry.argument_term_ == ((Server*)server_)->get_current_term() ) && 
+			( rpc->append_entry.argument_prev_log_index_ ==  ((Server*)server_)->get_log_index() - 1 ) &&
+			( rpc->append_entry.argument_prev_log_term_ == ((Server*)server_)->get_term_of_entry_in_log(((Server*)server_)->get_log_index() - 1) ) && 
+			( rpc->append_entry.argument_leader_commit_ == ((Server*)server_)->get_commit_index() )
+			) {
+
+		}
+		else {
+		}
 	}
 	else if (rpc->rpc_direction == RPCDirection::rpc_out_result) {
 	}
@@ -126,6 +136,9 @@ void Follower::dispatch_append_heart_beat(RPC* rpc)
 {
 	if (rpc->rpc_direction == RPCDirection::rpc_in_invoke) {
 
+		// save current leader's id.
+		((Server*)server_)->set_current_leader_id(rpc->append_entry.argument_leader_id_);
+
 		Tracer::trace("(Follower." + std::to_string(((Server*)server_)->get_server_id()) + ") Heart beat from Leader." + std::to_string(rpc->append_entry.argument_leader_id_) + "\r\n");
 
 		rpc->rpc_direction = RPCDirection::rpc_out_result;
@@ -141,6 +154,32 @@ void Follower::dispatch_append_heart_beat(RPC* rpc)
 	else if (rpc->rpc_direction == RPCDirection::rpc_out_result) {
 	}
 }
+
+void Follower::dispatch_client_request_leader(RPC* rpc)
+{
+	if (rpc->rpc_direction == RPCDirection::rpc_in_invoke) {
+		// We are not Leader, so we reply with leader's id.( If I known it... )  
+		rpc->rpc_direction = RPCDirection::rpc_out_result;
+		rpc->client_request.client_result = true;
+		rpc->client_request.client_leader = ((Server*)server_)->get_current_leader_id();
+
+		send(rpc,
+			BASE_PORT + RECEIVER_PORT + rpc->client_request.client_id,
+			std::string(SERVER_TEXT) + "(L)." + std::to_string(((Server*)server_)->get_server_id()),
+			std::string(HEART_BEAT_TEXT) + std::string("(") + std::string(INVOKE_TEXT) + std::string(")"),
+			std::string(CLIENT_TEXT) + "(Unique)." + std::to_string(rpc->client_request.client_id)
+		);
+	}
+	else if (rpc->rpc_direction == RPCDirection::rpc_out_result) {
+		// N/A
+	}
+}
+
+void Follower::dispatch_client_request_value(RPC* rpc)
+{
+	// N/A	
+}
+
 
 
 void Follower::dispatch(RPC* rpc) 
@@ -163,6 +202,14 @@ void Follower::dispatch(RPC* rpc)
 		// Another server establishes itself as a leader. 
 		else if (rpc->rpc_type == RPCTypeEnum::rpc_append_heart_beat) {
 			dispatch_append_heart_beat(rpc);
+		}
+		// A client request a leader
+		else if (rpc->rpc_type == RPCTypeEnum::rpc_client_request_leader) {
+			dispatch_client_request_leader(rpc);
+		}
+		// A client request value
+		else if (rpc->rpc_type == RPCTypeEnum::rpc_client_request_value) {
+			dispatch_client_request_value(rpc);
 		}
 		else 
 			Tracer::trace("Follower::dispatch - Wrong!!! type " + std::to_string(static_cast<int>(rpc->rpc_type)) + "\r\n");

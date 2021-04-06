@@ -29,6 +29,9 @@ Leader::~Leader()
 
 void Leader::start()
 {
+	// I'm a leader.
+	((Server*)server_)->set_current_leader_id(((Server*)server_)->get_server_id());											
+
 	thread_send_heart_beat_all_servers_ = std::thread(&Leader::send_heart_beat_all_servers, this);
 
 	thread_check_leader_time_out_to_change_term_ = std::thread(&Leader::check_leader_time_out_to_change_term, this);
@@ -141,6 +144,7 @@ void Leader::dispatch_request_vote(RPC* rpc) {
 void Leader::dispatch_append_heart_beat(RPC* rpc)
 {
 	if (rpc->rpc_direction == RPCDirection::rpc_in_invoke) {
+		// TODO:
 	}
 	else if (rpc->rpc_direction == RPCDirection::rpc_out_result) {
 		if(rpc->append_entry.result_success_ == (uint32_t)true)
@@ -231,6 +235,7 @@ void Leader::dispatch(RPC* rpc)
 		else if (rpc->rpc_type == RPCTypeEnum::rpc_client_request_leader) {
 			dispatch_client_request_leader(rpc);
 		}
+		// A client request value
 		else if (rpc->rpc_type == RPCTypeEnum::rpc_client_request_value) {
 			dispatch_client_request_value(rpc);
 		}

@@ -17,6 +17,7 @@ Server::Server(uint32_t server_id)
 	current_term_			= 0;							// Latest term server has seen (initialized to 0 on first boot, increases monotonically)
 	voted_for_				= NONE;							// CandidateId that received vote in current term(or null if none)
 	memset(&log_, 0, sizeof(log_));							// Log entries; each entry contains command for state machine, and term when entry was received by leader(first index is 1)
+	current_leader_id_		= NONE;							// Current leader's id 
 
 	// Volatile state on all servers. 
 	commit_index_			= 0;							// Index of highest log entry known to be committed(initialized to 0, increases	monotonically)
@@ -242,4 +243,14 @@ uint32_t Server::get_log_index()
 uint32_t Server::get_term_of_entry_in_log(uint32_t log_index)
 {
 	return log_.log_[log_index].get_term_when_entry_was_received_by_leader();
+}
+
+uint32_t Server::get_current_leader_id()
+{
+	return current_leader_id_;
+}
+
+void Server::set_current_leader_id(uint32_t leader_id)
+{
+	current_leader_id_ = leader_id;
 }
