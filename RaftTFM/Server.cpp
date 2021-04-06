@@ -219,7 +219,7 @@ void Server::set_voted_for(int32_t vote_for)
 	voted_for_ = vote_for;
 }
 
-uint32_t  Server::write_log(std::string state_machine_command)
+uint32_t  Server::write_log(uint32_t state_machine_command)
 {
 	// Increment log index; 
 	log_.log_index_++;

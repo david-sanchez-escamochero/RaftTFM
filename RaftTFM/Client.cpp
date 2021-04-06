@@ -72,15 +72,15 @@ void* Client::receive()
             if (
                 (rpc.rpc_direction == RPCDirection::rpc_out_result) && 
                 (rpc.rpc_type == RPCTypeEnum::rpc_client_request_leader) && 
-                (rpc.client_request.client_result == (uint32_t)true)                
+                (rpc.client_request.client_result_ == (uint32_t)true)                
                 ) {
-                leader_ = rpc.client_request.client_leader;
+                leader_ = rpc.client_request.client_leader_;
                 cv_found_a_leader_.notify_one();
             } 
             else if (
                 (rpc.rpc_direction == RPCDirection::rpc_out_result) &&
                 (rpc.rpc_type == RPCTypeEnum::rpc_client_request_value) &&
-                (rpc.client_request.client_result == (uint32_t)true)
+                (rpc.client_request.client_result_ == (uint32_t)true)
                 ) {                
                 cv_committed_value_.notify_one();
             }
@@ -94,7 +94,7 @@ void Client::send_request_to_find_a_leader(uint32_t num_server) {
     RPC rpc;
     rpc.rpc_direction = RPCDirection::rpc_in_invoke;
     rpc.rpc_type = RPCTypeEnum::rpc_client_request_leader;
-    rpc.client_request.client_id = client_id_;
+    rpc.client_request.client_id_ = client_id_;
 
     int ret = NO_LEADER_FOUND;
     
@@ -124,8 +124,8 @@ bool Client::send_request(std::string file_name, uint32_t leader_id)
             RPC rpc; 
             rpc.rpc_direction = RPCDirection::rpc_in_invoke;
             rpc.rpc_type = RPCTypeEnum::rpc_client_request_value;
-            rpc.client_request.client_id = client_id_;
-            rpc.client_request.client_value = value;
+            rpc.client_request.client_id_ = client_id_;
+            rpc.client_request.client_value_ = atoi(value.c_str());
             cv_status time_out; 
 
             do {

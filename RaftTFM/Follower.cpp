@@ -160,14 +160,14 @@ void Follower::dispatch_client_request_leader(RPC* rpc)
 	if (rpc->rpc_direction == RPCDirection::rpc_in_invoke) {
 		// We are not Leader, so we reply with leader's id.( If I known it... )  
 		rpc->rpc_direction = RPCDirection::rpc_out_result;
-		rpc->client_request.client_result = true;
-		rpc->client_request.client_leader = ((Server*)server_)->get_current_leader_id();
+		rpc->client_request.client_result_ = true;
+		rpc->client_request.client_leader_ = ((Server*)server_)->get_current_leader_id();
 
 		send(rpc,
-			BASE_PORT + RECEIVER_PORT + rpc->client_request.client_id,
+			BASE_PORT + RECEIVER_PORT + rpc->client_request.client_id_,
 			std::string(SERVER_TEXT) + "(L)." + std::to_string(((Server*)server_)->get_server_id()),
 			std::string(HEART_BEAT_TEXT) + std::string("(") + std::string(INVOKE_TEXT) + std::string(")"),
-			std::string(CLIENT_TEXT) + "(Unique)." + std::to_string(rpc->client_request.client_id)
+			std::string(CLIENT_TEXT) + "(Unique)." + std::to_string(rpc->client_request.client_id_)
 		);
 	}
 	else if (rpc->rpc_direction == RPCDirection::rpc_out_result) {

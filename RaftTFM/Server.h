@@ -47,7 +47,7 @@ public:
 	void		set_voted_for(int32_t vote_for);
 
 	// Manager logs. 
-	uint32_t	write_log(std::string state_machine_command);
+	uint32_t	write_log(uint32_t state_machine_command);
 	uint32_t	get_log_index();
 	uint32_t	get_term_of_entry_in_log(uint32_t log_index);
 

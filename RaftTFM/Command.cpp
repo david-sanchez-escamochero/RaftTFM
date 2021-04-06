@@ -1,11 +1,11 @@
 #include "Command.h"
 
-void Command::set_state_machime_command(std::string state_machine_command)
+void Command::set_state_machime_command(uint32_t state_machine_command)
 {
 	state_machine_command_ = state_machine_command;
 }
 
-std::string Command::get_state_machime_command()
+uint32_t Command::get_state_machime_command()
 {
 	return state_machine_command_;
 }

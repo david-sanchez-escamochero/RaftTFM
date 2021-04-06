@@ -7,11 +7,11 @@ class ClientRequest
 {
 public:
 	// Arguments:
-	uint32_t client_id;
-	std::string client_value;
+	uint32_t client_id_;
+	uint32_t client_value_;
 	// Results: 
-	uint32_t client_result;
-	uint32_t client_leader;
+	uint32_t client_result_;
+	uint32_t client_leader_;
 };
 
 

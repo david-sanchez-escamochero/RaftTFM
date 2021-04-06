@@ -159,14 +159,14 @@ void Leader::dispatch_client_request_leader(RPC* rpc)
 	if (rpc->rpc_direction == RPCDirection::rpc_in_invoke) {
 		// Actually we are Leader, so we reply with our id.
 		rpc->rpc_direction = RPCDirection::rpc_out_result;
-		rpc->client_request.client_result = true;
-		rpc->client_request.client_leader = ((Server*)server_)->get_server_id();	
+		rpc->client_request.client_result_ = true;
+		rpc->client_request.client_leader_ = ((Server*)server_)->get_server_id();	
 
 		send(rpc,
-			BASE_PORT + RECEIVER_PORT + rpc->client_request.client_id,
+			BASE_PORT + RECEIVER_PORT + rpc->client_request.client_id_,
 			std::string(SERVER_TEXT) + "(L)." + std::to_string(((Server*)server_)->get_server_id()),
 			std::string(HEART_BEAT_TEXT) + std::string("(") + std::string(INVOKE_TEXT) + std::string(")"),
-			std::string(CLIENT_TEXT) + "(Unique)." + std::to_string(rpc->client_request.client_id)
+			std::string(CLIENT_TEXT) + "(Unique)." + std::to_string(rpc->client_request.client_id_)
 		);
 	}
 	else if (rpc->rpc_direction == RPCDirection::rpc_out_result) {
@@ -181,8 +181,8 @@ void Leader::dispatch_client_request_value(RPC* rpc)
 
 		// Write to log.
 
-		// TODO:
-		std::string client_value = rpc->client_request.client_value;
+		
+		uint32_t client_value = rpc->client_request.client_value_;
 		uint32_t ret = ((Server*)server_)->write_log(client_value);
 		if (ret == MANAGER_NO_ERROR) {
 			for (uint32_t num_server = 0; num_server < NUM_SERVERS; num_server++) {
