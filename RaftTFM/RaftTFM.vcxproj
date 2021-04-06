@@ -156,6 +156,7 @@
     <ClCompile Include="Follower.cpp" />
     <ClCompile Include="Leader.cpp" />
     <ClCompile Include="ManagerLog.cpp" />
+    <ClCompile Include="RaftUtils.cpp" />
     <ClCompile Include="Tracer.cpp" />
     <ClCompile Include="Communication.cpp" />
     <ClCompile Include="RaftTFM.cpp" />

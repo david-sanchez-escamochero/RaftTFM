@@ -16,7 +16,7 @@
 
 #define COMPILE_TIME_ASSERT(expr) {typedef char COMP_TIME_ASSERT[(expr) ? 1 : 0];}
 
-#define MAX_SIZE_BUFFER								512
+#define MAX_SIZE_BUFFER								1024
 
 
 class Communication

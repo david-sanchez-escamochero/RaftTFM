@@ -4,7 +4,7 @@
 enum class StateEnum { follower_state, leader_state, candidate_state, unknown_state };
 
 
-#define NUM_SERVERS												5
+#define NUM_SERVERS												3
 #define MAX_LOG_ENTRIES											50
 #define BASE_PORT												6000
 #define SENDER_PORT												100

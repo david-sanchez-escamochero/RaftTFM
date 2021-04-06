@@ -109,6 +109,7 @@ void* Server::receive()
 			Tracer::trace("Follower::receive - FAILED!!!  - error" + std::to_string(error) + "\r\n");
 		}
 		else {
+			int xx = sizeof(rpc);
 			queue_.push(rpc);
 			semaphore_dispatch_.notify(SEMAPHORE_SERVER_DISPATCH);
 		}
@@ -159,7 +160,7 @@ void Server::check_new_state()
 				//std::lock_guard<std::mutex> locker_new_state(mu_new_state_);
 				std::lock_guard<std::mutex> locker(mu_server_);
 				if (current_state_ != new_state_) {
-					Tracer::trace("Server(" + std::to_string(server_id_) + ") State changes from " + parse_state_to_string(current_state_) + " to " + parse_state_to_string(new_state_) + "\r\n");
+					Tracer::trace("Server(" + std::to_string(server_id_) + ") State changes from " + RaftUtils::parse_state_to_string(current_state_) + " to " + RaftUtils::parse_state_to_string(new_state_) + "\r\n");
 					current_state_ = new_state_;
 					connector_ = get_current_shape_sever(current_state_);
 

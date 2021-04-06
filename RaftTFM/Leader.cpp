@@ -88,7 +88,7 @@ void Leader::send_heart_beat_all_servers()
 						rpc.append_entry.argument_leader_id_ = ((Server*)server_)->get_server_id();															// So follower can redirect clients
 						rpc.append_entry.argument_prev_log_index_ = ((Server*)server_)->get_log_index() - 1;												// Index of log entry immediately preceding	new ones
 						rpc.append_entry.argument_prev_log_term_ = ((Server*)server_)->get_term_of_entry_in_log(((Server*)server_)->get_log_index() - 1);	// Term of argument_prev_log_index entry
-						rpc.append_entry.argument_entries_[0] = "";																							// Log entries to store(empty for heartbeat; may send more than one for efficiency)
+						rpc.append_entry.argument_entries_[0] = NONE;																							// Log entries to store(empty for heartbeat; may send more than one for efficiency)
 						rpc.append_entry.argument_leader_commit_ = ((Server*)server_)->get_commit_index();													// Leader’s commitIndex
 
 
@@ -179,7 +179,9 @@ void Leader::dispatch_client_request_value(RPC* rpc)
 {
 	if (rpc->rpc_direction == RPCDirection::rpc_in_invoke) {
 
-		// Write to log. 
+		// Write to log.
+
+		// TODO:
 		std::string client_value = rpc->client_request.client_value;
 		uint32_t ret = ((Server*)server_)->write_log(client_value);
 		if (ret == MANAGER_NO_ERROR) {
@@ -191,7 +193,8 @@ void Leader::dispatch_client_request_value(RPC* rpc)
 				rpc.append_entry.argument_leader_id_		= ((Server*)server_)->get_server_id();														// So follower can redirect clients
 				rpc.append_entry.argument_prev_log_index_	= ((Server*)server_)->get_log_index() - 1;													// Index of log entry immediately preceding	new ones
 				rpc.append_entry.argument_prev_log_term_	= ((Server*)server_)->get_term_of_entry_in_log(((Server*)server_)->get_log_index() - 1);	// Term of argument_prev_log_index entry
-				rpc.append_entry.argument_entries_[0]		= client_value;																				// Log entries to store(empty for heartbeat; may send more than one for efficiency)
+				// TODO:
+				rpc.append_entry.argument_entries_[0]		= 0;																				// Log entries to store(empty for heartbeat; may send more than one for efficiency)
 				rpc.append_entry.argument_leader_commit_	= ((Server*)server_)->get_commit_index();													// Leader’s commitIndex
 
 				send(&rpc,

@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <stdlib.h>
 #include "Tracer.h"
+#include "RaftUtils.h"
 
 
 Communication::Communication() {
@@ -150,7 +151,7 @@ int Communication::receiveMessage(RPC* rpc, unsigned short port, std::string rec
     *rpc = *rpc_aux;
 
         
-    str_trace = "[>>>>> Received [" + rpc->parse_from_enum_to_text(rpc->rpc_type) + "] to (" + receiver + "(" + std::to_string(port) + ")) - from (" + std::string(SERVER_TEXT) + "." + std::to_string(rpc->server_id_origin) + ")   - OK] \r\n";
+    str_trace = "[>>>>> Received [" + RaftUtils::parse_from_rcp_enum_to_text(rpc->rpc_type) + "] to (" + receiver + "(" + std::to_string(port) + ")) - from (" + std::string(SERVER_TEXT) + "." + std::to_string(rpc->server_id_origin) + ")   - OK] \r\n";
     Tracer::trace(str_trace);
     // Cerramos el socket de la comunicacion
     closesocket(comm_socket);

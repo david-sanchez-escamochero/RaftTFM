@@ -25,9 +25,7 @@ public:
 		AppendEntry append_entry;
 		RequestVote request_vote;
 		ClientRequest client_request;
-	//};
-
-	std::string parse_from_enum_to_text(RPCTypeEnum type);
+	//};	
 };
 
 

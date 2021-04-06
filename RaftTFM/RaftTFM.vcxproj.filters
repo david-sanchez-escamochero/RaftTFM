@@ -57,6 +57,9 @@
     <ClCompile Include="ManagerLog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RaftUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Follower.h">
