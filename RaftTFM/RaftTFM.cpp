@@ -26,7 +26,7 @@ int main(int argc, char** argv)
             Tracer::trace("   Starting RaftClient\r\n");
             Tracer::trace("************************\r\n");
             Client client;
-            if (!client.start(".\\..\\Debug\\names_starts_with_A.txt", std::stoi(argv[1])))
+            if (!client.start(".\\..\\Debug\\numbers_starts_with_1.txt", std::stoi(argv[1])))
                 Tracer::trace("RaftClient - Failed to start. \r\n");
         }
         // If it is a Server. 
