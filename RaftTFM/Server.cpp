@@ -117,32 +117,32 @@ void* Server::receive()
 	return nullptr;
 }
 
-IConnector* Server::get_current_shape_sever(StateEnum state)
+IRole* Server::get_current_shape_sever(StateEnum state)
 {
 	// Before creating a new role, we have to delete previous one. 
 	if (connector_ != nullptr)
 		delete(connector_);
 
-	IConnector* connector; 
+	IRole* role; 
 	if (state == StateEnum::follower_state) {
-		connector = new Follower(this);		
+		role = new Follower(this);		
 		Tracer::trace("Created Follower." + std::to_string(get_server_id()) + "\r\n");
 	}
 	else if (state == StateEnum::candidate_state) {
-		connector = new Candidate(this);
+		role = new Candidate(this);
 		Tracer::trace("Created Candidate." + std::to_string(get_server_id()) + "\r\n");
 	}
 	else if (state == StateEnum::leader_state) {
-		connector = new Leader(this);	
+		role = new Leader(this);	
 		Tracer::trace("Created Leader." + std::to_string( get_server_id() ) +"\r\n");
 	}
 	else {
 		std::string color_name{ "GREEN" };
 		Tracer::trace("Server::get_current_shape_sever -  FAILED!!! Unknow state:" + std::to_string(static_cast<int>(state)) + "%d\r\n");
-		connector = NULL;
+		role = NULL;
 	}
 
-	return connector;
+	return role;
 }
 
 uint32_t Server::get_server_id()

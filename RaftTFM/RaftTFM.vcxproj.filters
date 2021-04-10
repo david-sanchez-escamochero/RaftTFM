@@ -89,9 +89,6 @@
     <ClInclude Include="RequestVote.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IConnector.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="RPC.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -117,6 +114,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ManagerLog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IRole.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

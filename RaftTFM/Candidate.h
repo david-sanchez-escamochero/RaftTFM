@@ -1,13 +1,13 @@
 #pragma once
 
-#include "IConnector.h"
+#include "IRole.h"
 #include "Server.h"
 #include <string>
 #include <mutex>
 
 
 
-class Candidate : public IConnector
+class Candidate : public IRole
 {
 public:
 	Candidate(void *server);

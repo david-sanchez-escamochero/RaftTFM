@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "IConnector.h"
+#include "IRole.h"
 #include "RPC.h"
 #include "Communication.h"
 #include "Server.h"
@@ -11,7 +11,7 @@
 
 using namespace std::chrono;
 
-class Follower : public IConnector
+class Follower : public IRole
 {
 public:
 	Follower(void* server);

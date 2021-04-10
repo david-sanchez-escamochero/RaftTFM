@@ -172,7 +172,7 @@
     <ClInclude Include="ClientRequest.h" />
     <ClInclude Include="Command.h" />
     <ClInclude Include="Follower.h" />
-    <ClInclude Include="IConnector.h" />
+    <ClInclude Include="IRole.h" />
     <ClInclude Include="Leader.h" />
     <ClInclude Include="ManagerLog.h" />
     <ClInclude Include="Tracer.h" />

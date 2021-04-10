@@ -2,12 +2,12 @@
 
 #include "RaftDefs.h"
 #include <stdint.h>
-#include "IConnector.h"
+#include "IRole.h"
 #include "Server.h"
 #include <mutex>
 
 
-class Leader : public IConnector
+class Leader : public IRole
 {
 
 

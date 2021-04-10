@@ -6,7 +6,7 @@
 #include "Candidate.h"
 #include "Follower.h"
 #include "Leader.h"
-#include "IConnector.h"
+#include "IRole.h"
 #include "Semaphore.h"
 #include <queue>
 #include "ManagerLog.h"
@@ -29,7 +29,7 @@ public:
 	void		send(RPC* rpc, unsigned short port, std::string sender, std::string action, std::string receiver);
 	void*		receive();
 	void		start();
-	IConnector* get_current_shape_sever(StateEnum state);
+	IRole* get_current_shape_sever(StateEnum state);
 	uint32_t    get_server_id();
 	void		set_new_state(StateEnum state);
 	std::mutex	mu_server_;
@@ -77,7 +77,7 @@ protected:
 	
 private: 
 	
-	IConnector*		connector_;
+	IRole*			connector_;
 	uint32_t		server_id_;
 	Communication	communication_;
 	bool			have_to_die_;	
